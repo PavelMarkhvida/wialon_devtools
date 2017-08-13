@@ -1,17 +1,9 @@
 import grequests
 import requests
+from PyQt5 import QtCore, QtNetwork
 import json
 import time
 
-def callback_factory(*factory_args, **factory_kwargs):
-	def response_hook(response, *args, **kwargs):
-		print('response received' + str(response))
-		time.sleep(5)
-		factory_kwargs['user_cb'](response, factory_kwargs['user_cb_args'])
-	return response_hook
-
-def print_response(response, *args, **kwargs):
-	print(response)
 
 class WialonSDKClient():
 
@@ -22,7 +14,7 @@ class WialonSDKClient():
 		self.login = 'wialon'
 		self.password = 'password'
 		self.sid = None
-		self.jobs = []
+		self.nm = QtNetwork.QNetworkAccessManager()
 
 
 	def do_login(self, cb):
@@ -40,6 +32,8 @@ class WialonSDKClient():
 			cb(1, 'Please, provide username')
 			return
 
+		login_url = '{}://{}:{}/oauth/authorize.html'.format(self.protocol, self.ip, self.port)
+
 		data = {
 			'client_id': 'Devtools',
 			'login': self.login,
@@ -51,28 +45,39 @@ class WialonSDKClient():
 			'access_type': 0x100
 		}
 
-		rs = grequests.post('{}://{}:{}/oauth/authorize.html'.format(self.protocol, self.ip, self.port), params=data, allow_redirects=False, \
-			hooks={'response': [callback_factory(user_cb=self.finish_login, user_cb_args=cb)]})
-
-		j = grequests.send(rs, grequests.Pool(1))
-		j.join()
-		print('join finished')
-		# grequests.gevent.sleep(1)
-		# self.jobs.append(job)
-		# job.wait()
-		# time.sleep(1)
+		self.post(login_url, data, self.finish_login, cb)
 
 
-	def finish_login(self, r, cb):
-		access_token = get_token(r.headers["Location"])
-	
+	def finish_login(self, reply, cb):
+		if reply.error() != QtNetwork.QNetworkReply.NoError:
+			cb(1, 'Auth failed')
+			return
+
+		access_token = None
+		if reply.hasRawHeader(b'Location'):
+			access_token = get_token(reply.header(QtNetwork.QNetworkRequest.LocationHeader).toString())
+		else:
+			cb(1, 'Auth failed')
+			return
+
+		token_url = '{}://{}:{}/wialon/ajax.html'.format(self.protocol, self.ip, self.port)
+
 		data = {
 			'svc': 'token/login',
 			'params': json.dumps({'token': access_token})
 		}
 
-		r = requests.post('{}://{}:{}/wialon/ajax.html'.format(self.protocol, self.ip, self.port), params=data)
-		self.sid = r.json()['eid']
+		self.post(token_url, data, self.finish_get_sid, cb)
+
+
+	def finish_get_sid(self, reply, cb):
+		if reply.error() != QtNetwork.QNetworkReply.NoError:
+			cb(1, 'Auth failed')
+			return
+
+		response = json.loads(reply.readAll().data().decode('ascii'))
+
+		self.sid = response['eid']
 		cb(0, 'Auth successfull')
 		
 
@@ -157,6 +162,23 @@ class WialonSDKClient():
 
 	def get_password(self):
 		return self.password
+
+	def post(self, url, data, cb, cb_args):
+		body = QtCore.QByteArray()
+		body.append('&'.join(k + '=' + str(v) for k,v in data.items()))
+
+		qurl = QtCore.QUrl(url)
+		request = QtNetwork.QNetworkRequest(qurl)
+		request.setHeader(QtNetwork.QNetworkRequest.ContentTypeHeader, "application/x-www-form-urlencoded")
+		reply = self.nm.post(request, body)
+		reply.ignoreSslErrors()
+		reply.finished.connect(callback_factory(reply=reply, cb=cb, cb_args=cb_args))
+
+
+def callback_factory(*factory_args, **factory_kwargs):
+	def response_hook(*args, **kwargs):
+		factory_kwargs['cb'](factory_kwargs['reply'], factory_kwargs['cb_args'])
+	return response_hook
 
 
 def get_token(url):

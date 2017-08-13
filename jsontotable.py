@@ -32,7 +32,7 @@ class TablesManager():
 			new_path = list(path)
 			del new_path[-1]
 			cur_index = new_model.index(0, 1)
-			ctrl_widget = NavigationButton('...', self, new_path)
+			ctrl_widget = NavigationButton('..', self, new_path)
 			tv.setIndexWidget(cur_index, ctrl_widget)
 
 		# element is key in case if target is dict
@@ -89,7 +89,7 @@ class TableModel(QtCore.QAbstractTableModel):
 
 		if role == QtCore.Qt.DisplayRole:
 			if self.has_parent and row == 0:
-				return '...'
+				return '..'
 
 			if self.has_parent:
 				row = row - 1
