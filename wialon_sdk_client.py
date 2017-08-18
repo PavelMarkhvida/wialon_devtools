@@ -75,35 +75,50 @@ class WialonSDKClient():
 			cb(1, 'Auth failed')
 			return
 
-		response = json.loads(reply.readAll().data().decode('ascii'))
+		response = json.loads(reply.readAll().data().decode('utf-8'))
 
 		self.sid = response['eid']
 		cb(0, 'Auth successfull')
 		
 
-	def execute_request(self, svc, params):
+	def execute_request(self, svc, params, cb):
 		if not svc:
-			return 'Service isn\'t specified'
+			cb(1, 'Service isn\'t specified')
+			return
+
+		if params is None:
+			cb(1, 'Params aren\'t specified')
+			return
 
 		if not self.ip:
-			return 'Host isn\'t specified'
+			cb(1, 'Host isn\'t specified')
+			return
 
 		if not self.port:
-			return 'Port isn\'t specified'
+			cb(1, 'Port isn\'t specified')
+			return
 
-		if not sid_valid():
-			login_result = self.do_login()
-			if not login_result[0]:
-				return login_result[1]
+		if not self.sid:
+			cb(1, 'Not logged in')
+			return
+
+		service_url = '{}://{}:{}/wialon/ajax.html'.format(self.protocol, self.ip, self.port)
 
 		data = {
 			'sid': self.sid,
 			'svc': svc,
-			'params': params
+			'params': json.dumps(params)
 		}
 
-		r = requests.post('https://%s:%d/wialon/ajax.html'.format(self.ip, self.port), params=data)
-		return r.text
+		self.post(service_url, data, self.finish_execute, cb)
+
+	def finish_execute(self, reply, cb):
+		if reply.error() != QtNetwork.QNetworkReply.NoError:
+			cb(1, 'Request failed')
+			return
+
+		response = json.loads(reply.readAll().data().decode('ascii'))
+		cb(0, response)
 
 
 	def set_ip(self, ip):
