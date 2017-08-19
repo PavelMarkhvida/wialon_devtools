@@ -1,19 +1,25 @@
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 import wialon_sdk_client
 import devtools_helper
+import jsontotable
 
 class RequestsPage(QtWidgets.QWidget):
 	def __init__(self, wialon_client):
 		super().__init__()
 		self.wc = wialon_client
-		self.request_params = {}
+		self.request_params = {"spec":{"itemsType":"avl_unit","propName":"*","propValueMask":"*","sortType":""},"force":1,"flags":1,"from":0,"to":0}
 
-		self.target = QtWidgets.QLineEdit()
-		self.command = QtWidgets.QLineEdit()
+		self.target = QtWidgets.QLineEdit('core')
+		self.command = QtWidgets.QLineEdit('search_items')
 		self.exec_btn = QtWidgets.QPushButton('Execute')
 		self.exec_btn.clicked.connect(self.execute)
 
+		self.response_table = QtWidgets.QTableView()
+		self.clipboard = QtWidgets.QApplication.clipboard()
+
 		self.params_layout = QtWidgets.QVBoxLayout()
+		self.paste_btn = QtWidgets.QPushButton('Paste')
+		self.paste_btn.clicked.connect(self.paste_params)
 
 		self.status_label = QtWidgets.QStatusBar()
 		self.initPage()
@@ -43,12 +49,14 @@ class RequestsPage(QtWidgets.QWidget):
 		command_layout.addLayout(sdk_command_layout)
 		command_layout.addWidget(self.exec_btn)
 		command_layout.addStretch(1)
+		command_layout.addWidget(self.response_table)
 
 		left_layout.addLayout(command_layout)
 
 		right_layout = QtWidgets.QVBoxLayout()
 		right_layout.addWidget(QtWidgets.QLabel('<b>Service parameters</b>'))
 		right_layout.addLayout(self.params_layout)
+		right_layout.addWidget(self.paste_btn)
 		right_layout.addStretch(1)
 		
 		main_layout.addLayout(left_layout)
@@ -79,7 +87,9 @@ class RequestsPage(QtWidgets.QWidget):
 
 	def handle_execute(self, error, response):
 		if not error:
-			self.status_label.showMessage(str(response))
+			self.status_label.showMessage('Response received')
+			tm = jsontotable.TablesManager(self.response_table, response)
+			tm.render()
 		else:
 			self.status_label.showMessage(str(response))
 
@@ -97,40 +107,8 @@ class RequestsPage(QtWidgets.QWidget):
 
 		self.params_layout.addWidget(params_widget)
 
+	def paste_params(self):
+		clipped = self.clipboard.text()
+		self.request_params = json.loads(clipped)
+		self.updatePage()
 
-# def getRequestParamsWidget():
-# 	req_widget = QWidget()
-# 	requests_layout = QVBoxLayout()
-# 	requests_layout.addWidget(QLabel('<b>Service parameters</b>'))
-# 	devtools_helper.render(requests_layout, request_params, update_main_widget)
-# 	requests_layout.addStretch(1)
-# 	req_widget.setLayout(requests_layout)
-# 	return req_widget
-
-
-# def getSDKCommandWidget():
-# 	sdk_cmd_widget = QWidget()
-
-# 	command_layout = QVBoxLayout()
-# 	command_layout.addWidget(QLabel('<b>SDK command</b>'))
-	
-# 	target = QVBoxLayout()
-# 	target.addWidget(QLabel("Target"))
-# 	target.addWidget(QLineEdit())
-
-# 	command = QVBoxLayout()
-# 	command.addWidget(QLabel("Command"))
-# 	command.addWidget(QLineEdit())
-
-# 	sdk_command_layout = QHBoxLayout()
-# 	sdk_command_layout.addLayout(target)
-# 	sdk_command_layout.addLayout(command)
-
-# 	command_layout.addLayout(sdk_command_layout)
-# 	pb = QPushButton('Send')
-# 	pb.clicked.connect(send_request)
-# 	command_layout.addWidget(pb)
-# 	command_layout.addStretch(1)
-
-# 	sdk_cmd_widget.setLayout(command_layout)
-# 	return sdk_cmd_widget

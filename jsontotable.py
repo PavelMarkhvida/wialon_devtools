@@ -3,6 +3,9 @@ import sys
 
 class TablesManager():
 	def __init__(self, table_view, data):
+		table_view.setFocusPolicy(QtCore.Qt.NoFocus)
+		table_view.horizontalHeader().hide()
+		table_view.verticalHeader().hide()
 		if type(data) is list or type(data) is dict:
 			self.data = data
 		else:
@@ -33,7 +36,7 @@ class TablesManager():
 			del new_path[-1]
 			cur_index = new_model.index(0, 1)
 			ctrl_widget = NavigationButton('..', self, new_path)
-			tv.setIndexWidget(cur_index, ctrl_widget)
+			self.table_view.setIndexWidget(cur_index, ctrl_widget)
 
 		# element is key in case if target is dict
 		# element is index in case if target is list
@@ -59,7 +62,7 @@ class TablesManager():
 				new_path.append(child)
 
 				ctrl_widget = NavigationButton(str(len(target[child])), self, new_path)
-				tv.setIndexWidget(cur_index, ctrl_widget)
+				self.table_view.setIndexWidget(cur_index, ctrl_widget)
 
 			target_index = target_index + 1
 

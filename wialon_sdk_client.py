@@ -8,11 +8,11 @@ import time
 class WialonSDKClient():
 
 	def __init__(self):
-		self.protocol = 'http'
-		self.ip = '10.0.2.15'
-		self.port = '8021'
-		self.login = 'wialon'
-		self.password = 'password'
+		self.protocol = 'https'
+		self.ip = 'hst-api.wialon.com'
+		self.port = '443'
+		self.login = ''
+		self.password = ''
 		self.sid = None
 		self.nm = QtNetwork.QNetworkAccessManager()
 
@@ -177,6 +177,7 @@ class WialonSDKClient():
 
 	def get_password(self):
 		return self.password
+
 
 	def post(self, url, data, cb, cb_args):
 		body = QtCore.QByteArray()
