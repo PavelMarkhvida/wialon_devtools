@@ -1,5 +1,3 @@
-import grequests
-import requests
 from PyQt5 import QtCore, QtNetwork
 import json
 import time
@@ -8,19 +6,17 @@ import time
 class WialonSDKClient():
 
 	def __init__(self):
-		self.protocol = 'https'
-		self.ip = 'hst-api.wialon.com'
-		self.port = '443'
-		self.login = ''
-		self.password = ''
-		self.sid = None
+		self.secure = False
+		self.host = str()
+		self.port = str()
+		self.sid = str()
 		self.nm = QtNetwork.QNetworkAccessManager()
 
 
-	def do_login(self, cb):
+	def login(self, user, password, cb):
 		"Try to login/relogin"
 
-		if not self.ip:
+		if not self.host:
 			cb(1, 'Host isn\'t specified')
 			return
 
@@ -28,16 +24,16 @@ class WialonSDKClient():
 			cb(1, 'Port isn\'t specified')
 			return
 
-		if not self.login:
+		if not user:
 			cb(1, 'Please, provide username')
 			return
 
-		login_url = '{}://{}:{}/oauth/authorize.html'.format(self.protocol, self.ip, self.port)
+		login_url = '{}://{}:{}/oauth/authorize.html'.format(self.get_protocol(), self.host, self.port)
 
-		data = {
+		request = {
 			'client_id': 'Devtools',
-			'login': self.login,
-			'passw': self.password,
+			'login': user,
+			'passw': password,
 			'response_type': 'token',
 			'activation_time': 0,
 			'duration': 22592000,
@@ -45,7 +41,18 @@ class WialonSDKClient():
 			'access_type': 0x100
 		}
 
-		self.post(login_url, data, self.finish_login, cb)
+		self.post(login_url, request, self.finish_login, cb)
+
+
+	def token_login(self, access_token, cb):
+		token_url = '{}://{}:{}/wialon/ajax.html'.format(self.get_protocol(), self.host, self.port)
+
+		request = {
+			'svc': 'token/login',
+			'params': json.dumps({'token': access_token})
+		}
+
+		self.post(token_url, request, self.update_sid, cb)
 
 
 	def finish_login(self, reply, cb):
@@ -60,17 +67,9 @@ class WialonSDKClient():
 			cb(1, 'Auth failed')
 			return
 
-		token_url = '{}://{}:{}/wialon/ajax.html'.format(self.protocol, self.ip, self.port)
+		self.token_login(access_token, cb)
 
-		data = {
-			'svc': 'token/login',
-			'params': json.dumps({'token': access_token})
-		}
-
-		self.post(token_url, data, self.finish_get_sid, cb)
-
-
-	def finish_get_sid(self, reply, cb):
+	def update_sid(self, reply, cb):
 		if reply.error() != QtNetwork.QNetworkReply.NoError:
 			cb(1, 'Auth failed')
 			return
@@ -90,7 +89,7 @@ class WialonSDKClient():
 			cb(1, 'Params aren\'t specified')
 			return
 
-		if not self.ip:
+		if not self.host:
 			cb(1, 'Host isn\'t specified')
 			return
 
@@ -102,15 +101,16 @@ class WialonSDKClient():
 			cb(1, 'Not logged in')
 			return
 
-		service_url = '{}://{}:{}/wialon/ajax.html'.format(self.protocol, self.ip, self.port)
+		service_url = '{}://{}:{}/wialon/ajax.html'.format(self.get_protocol(), self.host, self.port)
 
-		data = {
+		request = {
 			'sid': self.sid,
 			'svc': svc,
 			'params': json.dumps(params)
 		}
 
-		self.post(service_url, data, self.finish_execute, cb)
+		self.post(service_url, request, self.finish_execute, cb)
+
 
 	def finish_execute(self, reply, cb):
 		if reply.error() != QtNetwork.QNetworkReply.NoError:
@@ -121,12 +121,12 @@ class WialonSDKClient():
 		cb(0, response)
 
 
-	def set_ip(self, ip):
-		self.ip = ip
+	def set_host(self, ip):
+		self.host = ip
 
 
-	def get_ip(self):
-		return self.ip
+	def get_host(self):
+		return self.host
 
 
 	def set_port(self, port):
@@ -137,18 +137,12 @@ class WialonSDKClient():
 		return self.port
 
 
-	def is_secure(self):
-		return self.protocol is 'https'
-
-
 	def set_secure(self, secure):
-		if secure:
-			self.protocol = 'https'
-			self.port = '443'
-		else:
-			self.protocol = 'http'
-			if self.port == '443':
-				self.port = '8021'
+		self.secure = secure
+
+
+	def is_secure(self):
+		return self.secure
 
 
 	def set_sid(self, sid):
@@ -159,24 +153,11 @@ class WialonSDKClient():
 		return self.sid
 
 
-	def sid_valid(self):
-		return self.sid # and len(self.sid) is 32
-
-
-	def set_login(self, login):
-		self.login = login
-
-
-	def get_login(self):
-		return self.login
-
-
-	def set_password(self, password):
-		self.password = password
-
-
-	def get_password(self):
-		return self.password
+	def get_protocol(self):
+		if self.is_secure:
+			return 'https'
+		else:
+			return 'http'
 
 
 	def post(self, url, data, cb, cb_args):
@@ -203,3 +184,4 @@ def get_token(url):
 	for p in params:
 		if 'access_token' in p:
 			return p.split('=')[1]
+

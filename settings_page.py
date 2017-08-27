@@ -1,82 +1,114 @@
 from PyQt5 import QtCore, QtWidgets
 import wialon_sdk_client
+import devtools_presets
 
 class SettingsPage(QtWidgets.QWidget):
 	def __init__(self, wialon_client):
 		super().__init__()
 		self.wc = wialon_client
 
-		self.hst = QtWidgets.QLineEdit()
-		self.port = QtWidgets.QLineEdit()
-		self.sid = QtWidgets.QLineEdit()
+		self.host_le = QtWidgets.QLineEdit()
+		self.port_le = QtWidgets.QLineEdit()
+		self.sid_le = QtWidgets.QLineEdit()
 
-		self.login = QtWidgets.QLineEdit()
-
-		self.password = QtWidgets.QLineEdit()
-		self.password.setEchoMode(QtWidgets.QLineEdit.Password)
-
+		self.user_le = QtWidgets.QLineEdit()
+		self.password_le = QtWidgets.QLineEdit()
+		self.password_le.setEchoMode(QtWidgets.QLineEdit.Password)
 		self.login_btn = QtWidgets.QPushButton('Login')
-		self.login_btn.clicked.connect(self.try_login)
 
-		self.secure = QtWidgets.QCheckBox()
-		self.secure.stateChanged.connect(self.change_secure)
+		self.secure_chx = QtWidgets.QCheckBox()
 
-		self.status_label = QtWidgets.QStatusBar()
+		self.status_lbl = QtWidgets.QStatusBar()
 		self.initPage()
 
 	def initPage(self):
-		page_layout = QtWidgets.QVBoxLayout()
-		settings_layout = QtWidgets.QHBoxLayout()
+		self.host_le.textChanged.connect(self.wc.set_host)
+		self.port_le.textChanged.connect(self.wc.set_port)
+		self.sid_le.textChanged.connect(self.wc.set_sid)
+		self.secure_chx.stateChanged.connect(self.wc.set_secure)
+		self.login_btn.clicked.connect(self.try_login)
 
-		self.hst.textChanged.connect(self.wc.set_ip)
-		self.port.textChanged.connect(self.wc.set_port)
-		self.sid.textChanged.connect(self.wc.set_sid)
-		self.login.textChanged.connect(self.wc.set_login)
-		self.password.textChanged.connect(self.wc.set_password)
+		page_lo = QtWidgets.QVBoxLayout()
+		
+		settings_gr = QtWidgets.QGroupBox('Settings')
+		settings_lo = QtWidgets.QHBoxLayout()
 
-		host_settings_layout = QtWidgets.QFormLayout()
-		host_settings_layout.addRow('Host', self.hst)
-		host_settings_layout.addRow('Port', self.port)
-		host_settings_layout.addRow('SID', self.sid)
-		host_settings_layout.addRow('Secure', self.secure)
+		host_settings_lo = QtWidgets.QFormLayout()
+		host_settings_lo.addRow('Host', self.host_le)
+		host_settings_lo.addRow('Port', self.port_le)
+		host_settings_lo.addRow('SID', self.sid_le)
+		host_settings_lo.addRow('Secure', self.secure_chx)
 
-		credentials_layout = QtWidgets.QFormLayout()
-		credentials_layout.addRow('Login', self.login)
-		credentials_layout.addRow('Password', self.password)
-		credentials_layout.addRow(self.login_btn)
+		credentials_lo = QtWidgets.QFormLayout()
+		credentials_lo.addRow('User', self.user_le)
+		credentials_lo.addRow('Password', self.password_le)
+		login_btn_lo = QtWidgets.QHBoxLayout()
+		login_btn_lo.addStretch(1)
+		login_btn_lo.addWidget(self.login_btn)
+		credentials_lo.addRow(login_btn_lo)
 
 
-		settings_layout.addLayout(host_settings_layout)
-		settings_layout.addLayout(credentials_layout)
+		settings_lo.addLayout(host_settings_lo)
+		settings_lo.addLayout(credentials_lo)
 
-		page_layout.addLayout(settings_layout)
-		page_layout.addStretch(1)
-		page_layout.addWidget(self.status_label)
+		settings_gr.setLayout(settings_lo)
 
-		self.setLayout(page_layout)
+		page_lo.addWidget(settings_gr)
+		page_lo.addWidget(devtools_presets.PresetsWidget('Settings presets', self.apply, self.fetch))
+		page_lo.addStretch(1)
+		page_lo.addWidget(self.status_lbl)
+
+		self.setLayout(page_lo)
 		self.updatePage()
 
-	def change_secure(self, secure):
-		self.wc.set_secure(secure)
-		self.updatePage()
 
 	def try_login(self):
 		self.login_btn.setEnabled(False)
-		self.sid.setEnabled(False)
-		self.status_label.showMessage('Trying to login')
-		login_result = self.wc.do_login(self.handle_login)
+		self.sid_le.setEnabled(False)
+		self.status_lbl.showMessage('Trying to login')
+		user = self.user_le.text()
+		password = self.password_le.text()
+		login_result = self.wc.login(user, password, self.handle_login)
 
 	def handle_login(self, error, status):
-		self.status_label.showMessage(status)
+		self.status_lbl.showMessage(status)
 		self.updatePage()
-		self.sid.setEnabled(True)
+		self.sid_le.setEnabled(True)
 		self.login_btn.setEnabled(True)
 
 
 	def updatePage(self):
-		self.hst.setText(self.wc.get_ip())
-		self.port.setText(str(self.wc.get_port()))
-		self.login.setText(self.wc.get_login())
-		self.password.setText(self.wc.get_password())
-		self.sid.setText(self.wc.get_sid())
-		self.secure.setChecked(self.wc.is_secure())
+		self.host_le.setText(self.wc.get_host())
+		self.port_le.setText(str(self.wc.get_port()))
+		self.sid_le.setText(self.wc.get_sid())
+		self.secure_chx.setChecked(self.wc.is_secure())
+
+
+	def apply(self, settings):
+		if 'host' in settings:
+			self.host_le.setText(settings['host'])
+		if 'port' in settings:
+			self.port_le.setText(settings['port'])
+		if 'user' in settings:
+			self.user_le.setText(settings['user'])
+		if 'password' in settings:
+			self.password_le.setText(settings['password'])
+
+
+	def fetch(self):
+		settings = {}
+		host = self.host_le.text()
+		if host:
+			settings['host'] = host
+		port = self.port_le.text()
+		if port:
+			settings['port'] = port
+		user = self.user_le.text()
+		if user:
+			settings['user'] = user
+		password = self.password_le.text()
+		if password:
+			settings['password'] = password
+		settings['secure'] = self.secure_chx.checkState()
+
+		return settings

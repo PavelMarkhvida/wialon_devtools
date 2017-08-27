@@ -2,6 +2,7 @@ from PyQt5 import QtWidgets, QtGui
 import wialon_sdk_client
 import devtools_helper
 import jsontotable
+import json
 
 class RequestsPage(QtWidgets.QWidget):
 	def __init__(self, wialon_client):
@@ -106,6 +107,7 @@ class RequestsPage(QtWidgets.QWidget):
 		params_widget.setLayout(rendered_params)
 
 		self.params_layout.addWidget(params_widget)
+
 
 	def paste_params(self):
 		clipped = self.clipboard.text()
