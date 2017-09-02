@@ -16,6 +16,7 @@ class RequestsPage(QtWidgets.QWidget):
 		self.exec_btn.clicked.connect(self.execute)
 
 		self.response_table = QtWidgets.QTableView()
+
 		self.clipboard = QtWidgets.QApplication.clipboard()
 
 		self.params_layout = QtWidgets.QVBoxLayout()
@@ -49,7 +50,6 @@ class RequestsPage(QtWidgets.QWidget):
 
 		command_layout.addLayout(sdk_command_layout)
 		command_layout.addWidget(self.exec_btn)
-		command_layout.addStretch(1)
 		command_layout.addWidget(self.response_table)
 
 		left_layout.addLayout(command_layout)

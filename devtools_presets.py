@@ -40,12 +40,13 @@ class PresetsWidget(QtWidgets.QGroupBox):
 
 	def save(self):
 		new_preset = dict()
-		preset_name = QtWidgets.QInputDialog.getText(self, "Name for new preset", "Enter name:", QLineEdit.Normal)
-		new_preset['name'] = preset_name
-		new_preset['preset'] = self.fetch_cb()
-		loaded_presets = self.load_presets()
-		loaded_presets.append(new_preset)
-		self.save_presets(loaded_presets)
+		preset_name = QtWidgets.QInputDialog.getText(self, "Name for new preset", "Enter name:", QtWidgets.QLineEdit.Normal)
+		if preset_name[1]:
+			new_preset['name'] = preset_name[0]
+			new_preset['preset'] = self.fetch_cb()
+			loaded_presets = self.load_presets()
+			loaded_presets.append(new_preset)
+			self.save_presets(loaded_presets)
 
 
 	def load_presets(self):
@@ -67,21 +68,32 @@ class PresetsLoadDialog(QtWidgets.QDialog):
 		self.presets_model = PresetsCollection(presets, preset_renderer)
 
 		self.presets_view = QtWidgets.QTableView()
+		self.presets_view.setFocusPolicy(QtCore.Qt.NoFocus)
+		self.presets_view.horizontalHeader().hide()
+		self.presets_view.verticalHeader().hide()
 		self.presets_view.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
 		self.presets_view.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
 		self.presets_view.setModel(self.presets_model)
 
 		self.buttonBox = QtWidgets.QDialogButtonBox()
-		delete_btn = QtWidgets.QPushButton('Delete')
-		delete_btn.clicked.connect(self.deletePreset)
-		load_btn = QtWidgets.QPushButton('Load')
-		load_btn.clicked.connect(self.loadPreset)
-		self.buttonBox.addButton(delete_btn, QtWidgets.QDialogButtonBox.ActionRole)
-		self.buttonBox.addButton(load_btn, QtWidgets.QDialogButtonBox.AcceptRole)
+		self.delete_btn = QtWidgets.QPushButton('Delete')
+		self.delete_btn.clicked.connect(self.deletePreset)
+		self.delete_btn.setEnabled(False)
+		self.load_btn = QtWidgets.QPushButton('Load')
+		self.load_btn.clicked.connect(self.loadPreset)
+		self.load_btn.setEnabled(False)
+		self.buttonBox.addButton(QtWidgets.QDialogButtonBox.Cancel)
+		self.buttonBox.addButton(self.delete_btn, QtWidgets.QDialogButtonBox.ActionRole)
+		self.buttonBox.addButton(self.load_btn, QtWidgets.QDialogButtonBox.AcceptRole)
+		self.presets_view.selectionModel().currentRowChanged.connect(self.presetSelected)
+
+		self.buttonBox.accepted.connect(self.accept)
+		self.buttonBox.rejected.connect(self.reject)
 
 		self.dialog_lo = QtWidgets.QVBoxLayout()
 		self.dialog_lo.addWidget(self.presets_view)
 		self.dialog_lo.addWidget(self.buttonBox)
+
 		self.setLayout(self.dialog_lo)
 
 	def deletePreset(self):
@@ -93,13 +105,16 @@ class PresetsLoadDialog(QtWidgets.QDialog):
 		selected = self.presets_view.selectionModel().selectedRows()
 		if selected:
 			self.loaded_preset = self.presets_model.data(selected[0], QtCore.Qt.UserRole)
-			self.accept()
 
 	def getFinishPresets(self):
 		return self.presets_model.presets
 
 	def getLoadedPreset(self):
 		return self.loaded_preset
+
+	def presetSelected(self):
+		self.load_btn.setEnabled(True)
+		self.delete_btn.setEnabled(True)
 
 
 # Model for presets view (used in load dialog)

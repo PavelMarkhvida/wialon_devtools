@@ -89,7 +89,6 @@ class SettingsPage(QtWidgets.QWidget):
 			self.status_lbl.showMessage('Failed to load preset')
 			return
 		if 'host' in settings['preset']:
-			print('Apply host')
 			self.host_le.setText(settings['preset']['host'])
 		if 'port' in settings['preset']:
 			self.port_le.setText(str(settings['preset']['port']))
@@ -121,9 +120,18 @@ class SettingsPage(QtWidgets.QWidget):
 		return settings
 
 	def render_preset(self, preset):
-		host = preset['host']
-		port = preset['port']
-		secure = preset['secure']
-		user = preset['user']
+		host = None
+		port = None
+		secure = None
+		user = None
+		if 'host' in preset:
+			host = preset['host']
+		if 'port' in preset:
+			port = preset['port']
+		if 'secure' in preset:
+			secure = preset['secure']
+		if 'user' in preset:
+			user = preset['user']
+
 		return 'host:{}, port:{}, secure:{}\n user:{}'.format(host, port, secure, user)
 
