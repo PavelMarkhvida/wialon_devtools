@@ -54,7 +54,7 @@ class SettingsPage(QtWidgets.QWidget):
 		settings_gr.setLayout(settings_lo)
 
 		page_lo.addWidget(settings_gr)
-		page_lo.addWidget(devtools_presets.PresetsWidget('Settings presets', self.apply, self.fetch))
+		page_lo.addWidget(devtools_presets.PresetsWidget('Settings presets', self.apply, self.fetch, self.render_preset))
 		page_lo.addStretch(1)
 		page_lo.addWidget(self.status_lbl)
 
@@ -85,14 +85,21 @@ class SettingsPage(QtWidgets.QWidget):
 
 
 	def apply(self, settings):
-		if 'host' in settings:
-			self.host_le.setText(settings['host'])
-		if 'port' in settings:
-			self.port_le.setText(settings['port'])
-		if 'user' in settings:
-			self.user_le.setText(settings['user'])
-		if 'password' in settings:
-			self.password_le.setText(settings['password'])
+		if not settings or 'preset' not in settings:
+			self.status_lbl.showMessage('Failed to load preset')
+			return
+		if 'host' in settings['preset']:
+			print('Apply host')
+			self.host_le.setText(settings['preset']['host'])
+		if 'port' in settings['preset']:
+			self.port_le.setText(str(settings['preset']['port']))
+		if 'user' in settings['preset']:
+			self.user_le.setText(settings['preset']['user'])
+		if 'password' in settings['preset']:
+			self.password_le.setText(settings['preset']['password'])
+		if 'secure' in settings['preset']:
+			self.secure_chx.setChecked(settings['preset']['secure'])
+		self.status_lbl.showMessage('Loaded preset {}'.format(settings['name']))
 
 
 	def fetch(self):
@@ -112,3 +119,11 @@ class SettingsPage(QtWidgets.QWidget):
 		settings['secure'] = self.secure_chx.checkState()
 
 		return settings
+
+	def render_preset(self, preset):
+		host = preset['host']
+		port = preset['port']
+		secure = preset['secure']
+		user = preset['user']
+		return 'host:{}, port:{}, secure:{}\n user:{}'.format(host, port, secure, user)
+
