@@ -27,6 +27,7 @@ class TablesManager():
 
 		new_model = TableModel(target, nested)
 		self.table_view.setModel(new_model)
+		self.table_view.horizontalHeader().setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
 
 		# apply navigation widgets to view
 

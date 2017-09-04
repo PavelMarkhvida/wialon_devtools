@@ -101,6 +101,14 @@ class PresetsLoadDialog(QtWidgets.QDialog):
 		self.dialog_lo.addWidget(self.presets_view)
 		self.dialog_lo.addWidget(self.buttonBox)
 
+		
+		# play around table view display settings
+		# self.presets_view.horizontalHeader().setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+		# self.presets_view.resizeColumnsToContents()
+		# self.presets_view.adjustSize()
+		# self.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
+		# print(self.sizePolicy().horizontalPolicy())
+
 		self.setLayout(self.dialog_lo)
 
 	def deletePreset(self):

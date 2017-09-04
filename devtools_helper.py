@@ -187,7 +187,7 @@ class DictAdder(Adder):
 class Deleter(QPushButton):
 	def __init__(self, location, update_cb):
 		super().__init__()
-		super().setIcon(QIcon('delete.png'))
+		super().setIcon(QIcon('images/delete.png'))
 		super().setIconSize(QSize(8, 8))
 		self.location = location
 		self.update = update_cb

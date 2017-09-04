@@ -19,7 +19,7 @@ class DevtoolsWidget(QtWidgets.QTabWidget):
 
 	def initUI(self):
 		self.setWindowTitle('Wialon Devtools')
-		self.setWindowIcon(QtGui.QIcon('wialon.png'))
+		self.setWindowIcon(QtGui.QIcon('images/wialon.png'))
 		self.setGeometry(300, 300, 650, 450)
 
 		wialon_client = wialon_sdk_client.WialonSDKClient()

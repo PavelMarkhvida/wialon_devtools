@@ -64,7 +64,6 @@ class RequestsPage(QtWidgets.QWidget):
 		main_layout.addLayout(right_layout)
 
 		page_layout.addLayout(main_layout)
-		page_layout.addStretch(1)
 		page_layout.addWidget(self.status_label)
 
 		self.setLayout(page_layout)
