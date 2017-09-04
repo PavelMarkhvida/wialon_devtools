@@ -51,6 +51,9 @@ class SettingsPage(QtWidgets.QWidget):
 
 		settings_lo.addLayout(host_settings_lo)
 		settings_lo.addLayout(credentials_lo)
+		settings_lo.setStretch(0, 4)
+		settings_lo.setStretch(1, 3)
+		settings_lo.addStretch(3)
 
 		settings_gr.setLayout(settings_lo)
 

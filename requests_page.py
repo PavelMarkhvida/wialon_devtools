@@ -62,10 +62,11 @@ class RequestsPage(QtWidgets.QWidget):
 		right_lo.addLayout(right_title_lo)
 		right_lo.addLayout(self.params_layout)
 		right_lo.addWidget(self.exec_btn)
-		right_lo.addStretch(1)
 		
 		main_layout.addLayout(left_lo)
 		main_layout.addLayout(right_lo)
+		main_layout.setStretch(0, 1)
+		main_layout.setStretch(1, 2)
 
 		page_layout.addLayout(main_layout)
 		page_layout.addWidget(self.status_label)
@@ -102,12 +103,15 @@ class RequestsPage(QtWidgets.QWidget):
 			self.params_layout.itemAt(0).widget().setParent(None)
 
 		# render new params widget
+		params_scrl_area = QtWidgets.QScrollArea()
+		params_scrl_area.setStyleSheet("background-color: #e7fcca; opacity: 0.5");
 		params_widget = QtWidgets.QWidget()
 		rendered_params = QtWidgets.QVBoxLayout()
 		devtools_params.render(rendered_params, self.request_params, self.updateParamsWidget)
 		params_widget.setLayout(rendered_params)
+		params_scrl_area.setWidget(params_widget)
 
-		self.params_layout.addWidget(params_widget)
+		self.params_layout.addWidget(params_scrl_area)
 
 	def pasteParamsFromBuffer(self):
 		clipped = self.clipboard.text()
