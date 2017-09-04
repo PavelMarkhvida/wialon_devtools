@@ -13,8 +13,8 @@ class RequestsPage(QtWidgets.QWidget):
 
 		self.target = QtWidgets.QLineEdit('core')
 		self.command = QtWidgets.QLineEdit('search_items')
-		self.exec_btn = QtWidgets.QPushButton('Execute')
-		self.exec_btn.clicked.connect(self.executeRequest)
+		self.send_btn = QtWidgets.QPushButton('Send')
+		self.send_btn.clicked.connect(self.executeRequest)
 
 		self.response_table = QtWidgets.QTableView()
 
@@ -23,6 +23,9 @@ class RequestsPage(QtWidgets.QWidget):
 		self.params_layout = QtWidgets.QVBoxLayout()
 		self.paste_btn = QtWidgets.QPushButton('Paste')
 		self.paste_btn.clicked.connect(self.pasteParamsFromBuffer)
+
+		self.copy_btn = QtWidgets.QPushButton('Copy')
+		self.copy_btn.clicked.connect(self.copyParamsToBuffer)
 
 		self.status_label = QtWidgets.QStatusBar()
 		self.initPage()
@@ -57,11 +60,12 @@ class RequestsPage(QtWidgets.QWidget):
 		right_lo = QtWidgets.QVBoxLayout()
 		right_title_lo = QtWidgets.QHBoxLayout()
 		right_title_lo.addWidget(QtWidgets.QLabel('<b>Service parameters</b>'))
-		right_title_lo.addStretch(1)
+		right_title_lo.addWidget(self.copy_btn)
 		right_title_lo.addWidget(self.paste_btn)
+		right_title_lo.addStretch(1)
+		right_title_lo.addWidget(self.send_btn)
 		right_lo.addLayout(right_title_lo)
 		right_lo.addLayout(self.params_layout)
-		right_lo.addWidget(self.exec_btn)
 		
 		main_layout.addLayout(left_lo)
 		main_layout.addLayout(right_lo)
@@ -85,7 +89,7 @@ class RequestsPage(QtWidgets.QWidget):
 			return
 		self.status_label.showMessage('Making request...')
 		svc = target + '/' + command
-		self.exec_btn.setEnabled(False)
+		self.send_btn.setEnabled(False)
 		self.wc.execute_request(svc, self.request_params, self.handleExecute)
 
 	def handleExecute(self, error, response):
@@ -95,7 +99,7 @@ class RequestsPage(QtWidgets.QWidget):
 		else:
 			self.status_label.showMessage(str(response))
 
-		self.exec_btn.setEnabled(True)
+		self.send_btn.setEnabled(True)
 
 	def updateParamsWidget(self):
 		# delete old params widget
@@ -117,3 +121,7 @@ class RequestsPage(QtWidgets.QWidget):
 		clipped = self.clipboard.text()
 		self.request_params = json.loads(clipped)
 		self.updateParamsWidget()
+
+	def copyParamsToBuffer(self):
+		self.clipboard.setText(json.dumps(self.request_params, indent=4))
+
