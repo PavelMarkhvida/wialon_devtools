@@ -28,13 +28,20 @@ class PresetsWidget(QtWidgets.QGroupBox):
 		self.setLayout(lo)
 
 
-	def load(self):
+	def load(self, silent=False):
 		loaded_presets = self.load_presets()
-		load_dlg = PresetsLoadDialog(loaded_presets, self.preset_renderer)
-		load_dlg.exec()
-		loaded_preset = load_dlg.getLoadedPreset()
-		finish_presets = load_dlg.getFinishPresets()
-		self.save_presets(finish_presets)
+		loaded_preset = None
+
+		if silent:
+			if len(loaded_presets):
+				loaded_preset = loaded_presets[0]
+		else:
+			load_dlg = PresetsLoadDialog(loaded_presets, self.preset_renderer)
+			load_dlg.exec()
+			loaded_preset = load_dlg.getLoadedPreset()
+			finish_presets = load_dlg.getFinishPresets()
+			self.save_presets(finish_presets)
+
 		self.apply_cb(loaded_preset)
 
 

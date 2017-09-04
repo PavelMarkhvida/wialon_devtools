@@ -54,12 +54,14 @@ class SettingsPage(QtWidgets.QWidget):
 		settings_gr.setLayout(settings_lo)
 
 		page_lo.addWidget(settings_gr)
-		page_lo.addWidget(devtools_presets.PresetsWidget('Settings presets', self.apply, self.fetch, self.render_preset))
+		presets_widget = devtools_presets.PresetsWidget('Settings presets', self.apply, self.fetch, self.render_preset)
+		page_lo.addWidget(presets_widget)
 		page_lo.addStretch(1)
 		page_lo.addWidget(self.status_lbl)
 
 		self.setLayout(page_lo)
 		self.updatePage()
+		presets_widget.load(True)
 
 
 	def try_login(self):
@@ -133,5 +135,5 @@ class SettingsPage(QtWidgets.QWidget):
 		if 'user' in preset:
 			user = preset['user']
 
-		return 'host:{}, port:{}, secure:{}\n user:{}'.format(host, port, secure, user)
+		return '{}, {}, {}, {}'.format(host, port, secure, user)
 
