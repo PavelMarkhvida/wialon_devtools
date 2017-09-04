@@ -1,6 +1,7 @@
-from PyQt5.QtWidgets import QWidget, QMessageBox, QApplication, QStyleFactory, QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QTextEdit, QLineEdit, QComboBox, QCheckBox, QInputDialog, QDialog
-from PyQt5.QtGui import QIcon, QImageReader
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QPushButton, QLabel, QLineEdit, QInputDialog
+from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QSize
+
 
 def render(layout, elem, update_cb, location=None, add_deleter=False):
 	if type(elem) is dict:
@@ -25,9 +26,7 @@ def render_dictionary(elem, update_cb, location, add_deleter):
 
 	dict_start = QHBoxLayout()
 	dict_start.addWidget(QLabel('{'))
-	# dict_start.addWidget(DictAdder({}, elem, QIcon('dict.png')))
-	# dict_start.addWidget(DictAdder([], elem, QIcon('list.png')))
-	# dict_start.addWidget(DictAdder('', elem, QIcon('add.png')))
+
 	dict_start.addWidget(DictAdder({}, elem, '{ }', update_cb))
 	dict_start.addWidget(DictAdder([], elem, '[ ]', update_cb))
 	dict_start.addWidget(DictAdder('', elem, '+', update_cb))
@@ -72,9 +71,7 @@ def render_list(elem, update_cb, location, add_deleter):
 
 	list_start = QHBoxLayout()
 	list_start.addWidget(QLabel('['))
-	# list_start.addWidget(ListAdder({}, elem, QIcon('dict.png')))
-	# list_start.addWidget(ListAdder([], elem, QIcon('list.png')))
-	# list_start.addWidget(ListAdder('', elem, QIcon('add.png')))
+
 	list_start.addWidget(ListAdder({}, elem, '{ }', update_cb))
 	list_start.addWidget(ListAdder([], elem, '[ ]', update_cb))
 	list_start.addWidget(ListAdder('', elem, '+', update_cb))

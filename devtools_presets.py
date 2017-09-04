@@ -19,14 +19,12 @@ class PresetsWidget(QtWidgets.QGroupBox):
 
 		self.initWidget()
 
-
 	def initWidget(self):
 		lo = QtWidgets.QHBoxLayout()
 		lo.addWidget(self.load_btn)
 		lo.addWidget(self.save_btn)
 		lo.addStretch(1)
 		self.setLayout(lo)
-
 
 	def load(self, silent=False):
 		loaded_presets = self.load_presets()
@@ -44,7 +42,6 @@ class PresetsWidget(QtWidgets.QGroupBox):
 
 		self.apply_cb(loaded_preset)
 
-
 	def save(self):
 		new_preset = dict()
 		preset_name = QtWidgets.QInputDialog.getText(self, "Name for new preset", "Enter name:", QtWidgets.QLineEdit.Normal)
@@ -55,12 +52,10 @@ class PresetsWidget(QtWidgets.QGroupBox):
 			loaded_presets.append(new_preset)
 			self.save_presets(loaded_presets)
 
-
 	def load_presets(self):
 		# load from disk
 		global presets
 		return presets
-
 
 	def save_presets(self, updated_presets):
 		# store to disk
@@ -101,7 +96,7 @@ class PresetsLoadDialog(QtWidgets.QDialog):
 		self.dialog_lo.addWidget(self.presets_view)
 		self.dialog_lo.addWidget(self.buttonBox)
 
-		
+
 		# play around table view display settings
 		# self.presets_view.horizontalHeader().setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
 		# self.presets_view.resizeColumnsToContents()
@@ -150,7 +145,8 @@ class PresetsCollection(QtCore.QAbstractTableModel):
 			if index.column() == 0:
 				return self.presets[index.row()]['name']
 			if index.column() == 1:
-				return self.renderer(self.presets[index.row()]['preset'])
+				if self.renderer:
+					return self.renderer(self.presets[index.row()]['preset'])
 
 		if role == QtCore.Qt.UserRole:
 			return self.presets[index.row()]

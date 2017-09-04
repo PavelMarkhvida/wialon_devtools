@@ -1,6 +1,7 @@
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtWidgets
 import wialon_sdk_client
 import devtools_presets
+
 
 class SettingsPage(QtWidgets.QWidget):
 	def __init__(self, wialon_client):
@@ -63,7 +64,6 @@ class SettingsPage(QtWidgets.QWidget):
 		self.updatePage()
 		presets_widget.load(True)
 
-
 	def try_login(self):
 		self.login_btn.setEnabled(False)
 		self.sid_le.setEnabled(False)
@@ -78,13 +78,11 @@ class SettingsPage(QtWidgets.QWidget):
 		self.sid_le.setEnabled(True)
 		self.login_btn.setEnabled(True)
 
-
 	def updatePage(self):
 		self.host_le.setText(self.wc.get_host())
 		self.port_le.setText(str(self.wc.get_port()))
 		self.sid_le.setText(self.wc.get_sid())
 		self.secure_chx.setChecked(self.wc.is_secure())
-
 
 	def apply(self, settings):
 		if not settings or 'preset' not in settings:
@@ -100,8 +98,8 @@ class SettingsPage(QtWidgets.QWidget):
 			self.password_le.setText(settings['preset']['password'])
 		if 'secure' in settings['preset']:
 			self.secure_chx.setChecked(settings['preset']['secure'])
+		self.sid_le.setText('')
 		self.status_lbl.showMessage('Loaded preset {}'.format(settings['name']))
-
 
 	def fetch(self):
 		settings = {}

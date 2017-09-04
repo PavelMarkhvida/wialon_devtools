@@ -1,71 +1,76 @@
 from PyQt5 import QtWidgets, QtCore
 import sys
 
-class TablesManager():
-	def __init__(self, table_view, data):
-		table_view.setFocusPolicy(QtCore.Qt.NoFocus)
-		table_view.horizontalHeader().hide()
-		table_view.verticalHeader().hide()
-		if type(data) is list or type(data) is dict:
-			self.data = data
-		else:
-			self.data = {}
-		self.table_view = table_view
 
-	def render(self):
+def render(table_view, data_to_render):
+	TableRenderer(table_view, data_to_render)
+
+
+class TableRenderer():
+	def __init__(self, table_view, data_to_render):
+		self.table_view = table_view
+		self.table_view.setFocusPolicy(QtCore.Qt.NoFocus)
+		self.table_view.horizontalHeader().hide()
+		self.table_view.verticalHeader().hide()
+		
+		if type(data_to_render) is list or type(data_to_render) is dict:
+			self.data_to_render = data_to_render
+		else:
+			self.data_to_render = {}
+		
 		self.show_table([])
 
 	def show_table(self, path):
-		target = self.data
-		
+		# find frame according to path
+		current_frame = self.data_to_render
+		for level in path:
+			current_frame = current_frame[level]
+
+		# check if we are not on top frame
 		nested = False
 		if len(path):
 			nested = True
 
-		for e in path:
-			target = target[e]
-
-		new_model = TableModel(target, nested)
+		# create model for current frame and show it in view
+		new_model = TableModel(current_frame, nested)
 		self.table_view.setModel(new_model)
 		self.table_view.horizontalHeader().setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
 
-		# apply navigation widgets to view
-
+		# also apply navigation widgets to view
 		if nested:
+			# add possibility to go to parent frame
 			# first row is 'Up' button
-			new_path = list(path)
-			del new_path[-1]
-			cur_index = new_model.index(0, 1)
-			ctrl_widget = NavigationButton('..', self, new_path)
-			self.table_view.setIndexWidget(cur_index, ctrl_widget)
+			parent_path = list(path)
+			del parent_path[-1]
+			row_index = new_model.index(0, 1)
+			navigation_btn = NavigationButton('..', self, parent_path)
+			self.table_view.setIndexWidget(row_index, navigation_btn)
 
-		# element is key in case if target is dict
-		# element is index in case if target is list
-		target_is_list = (type(target) is list)
+		# check either we will iterate over dict or list
+		current_frame_is_list = (type(current_frame) is list)
 
 		# apply widgets for navigation to child objects
-		target_index = 0
-		for child in target:
+		child_index = 0
+		for child in current_frame:
+			if current_frame_is_list:
+				child = child_index
 
-			# in case if we render list we must access it's childs by index
-			if target_is_list:
-				child = target_index
-
-			child_is_object = type(target[child]) is list or type(target[child]) is dict
+			# check if navigation button is needed
+			child_is_object = type(current_frame[child]) is list or type(current_frame[child]) is dict
 
 			if child_is_object:
-				model_row = target_index
+				model_row_number = child_index
 				if nested:
-					model_row = target_index + 1
+					model_row_number = child_index + 1
 
-				cur_index = new_model.index(model_row, 1)
-				new_path = list(path)
-				new_path.append(child)
+				row_index = new_model.index(model_row_number, 1)
+				child_path = list(path)
+				child_path.append(child)
 
-				ctrl_widget = NavigationButton(str(len(target[child])), self, new_path)
-				self.table_view.setIndexWidget(cur_index, ctrl_widget)
+				navigation_btn = NavigationButton(str(len(current_frame[child])), self, child_path)
+				self.table_view.setIndexWidget(row_index, navigation_btn)
 
-			target_index = target_index + 1
+			child_index = child_index + 1
 
 
 class TableModel(QtCore.QAbstractTableModel):
@@ -76,6 +81,7 @@ class TableModel(QtCore.QAbstractTableModel):
 
 	def rowCount(self, index):
 		if self.has_parent:
+			# reserve placeholder for navigation to parent model
 			return len(self.table_data) + 1
 		else:
 			return len(self.table_data)
@@ -93,6 +99,7 @@ class TableModel(QtCore.QAbstractTableModel):
 
 		if role == QtCore.Qt.DisplayRole:
 			if self.has_parent and row == 0:
+				# return placeholder for navigation to parent model
 				return '..'
 
 			if self.has_parent:
@@ -106,13 +113,19 @@ class TableModel(QtCore.QAbstractTableModel):
 				requested_key = list(self.table_data.keys())[row]
 
 			if get_key:
+				# requested column with keys
 				return requested_key
 			else:
+				# requested column with values
 				elem_type = type(self.table_data[requested_key])
 				if elem_type is not dict and elem_type is not list:
+					# element is trivial value
+					# simply render it
 					return self.table_data[requested_key]
 				else:
-					return 'obj place'
+					# element is object
+					# return placeholder for navigation to it's model
+					return 'object placeholder'
 
 
 class NavigationButton(QtWidgets.QPushButton):
@@ -140,8 +153,7 @@ if __name__ == '__main__':
 	# data = None
 	# data = [5, 'sss', 6]
 	# data = 3
-	tm = TablesManager(tv, data)
-	tm.render()
+	tm = TableRenderer(tv, data)
 	l.addWidget(tv)
 
 
