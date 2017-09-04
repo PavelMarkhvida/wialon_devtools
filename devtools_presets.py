@@ -1,12 +1,13 @@
 from PyQt5 import QtWidgets, QtCore
+import json
 
-presets = list()
-presets.append({'name': 'Wialon Devtools', 'preset': {'host': 'hst-api.wialon.com', 'port': 443, 'secure': True, 'user': 'shse_test', 'password': '123'}})
-presets.append({'name': 'Wialon Local', 'preset': {'host': '127.0.0.1', 'port': 8021, 'secure': False, 'user': 'wialon'}})
 
 class PresetsWidget(QtWidgets.QGroupBox):
-	def __init__(self, title, apply_cb, fetch_cb, preset_renderer=None):
+	def __init__(self, title, apply_cb, fetch_cb, path, preset_renderer=None):
+		if not path:
+			return
 		super().__init__(title)
+		self.path = path
 		self.preset_renderer = preset_renderer
 		self.apply_cb = apply_cb
 		self.fetch_cb = fetch_cb
@@ -28,6 +29,8 @@ class PresetsWidget(QtWidgets.QGroupBox):
 
 	def load(self, silent=False):
 		loaded_presets = self.load_presets()
+		if not loaded_presets:
+			return
 		loaded_preset = None
 
 		if silent:
@@ -49,18 +52,21 @@ class PresetsWidget(QtWidgets.QGroupBox):
 			new_preset['name'] = preset_name[0]
 			new_preset['preset'] = self.fetch_cb()
 			loaded_presets = self.load_presets()
+			if not loaded_presets:
+				return
 			loaded_presets.append(new_preset)
 			self.save_presets(loaded_presets)
 
 	def load_presets(self):
-		# load from disk
-		global presets
+		presets = None
+		with open(self.path, 'r') as presets_file:
+			presets = json.load(presets_file)
 		return presets
 
 	def save_presets(self, updated_presets):
-		# store to disk
-		global presets
-		presets = updated_presets
+		with open(self.path, 'w') as presets_file:
+			json.dump(updated_presets, presets_file, indent=4)
+
 
 
 class PresetsLoadDialog(QtWidgets.QDialog):

@@ -1,0 +1,20 @@
+[
+    {
+        "name": "Wialon Devtools",
+        "preset": {
+            "host": "hst-api.wialon.com",
+            "secure": true,
+            "port": 443
+        }
+    },
+    {
+        "name": "Wialon Local",
+        "preset": {
+            "host": "127.0.0.1",
+            "password": "password",
+            "secure": false,
+            "port": 8021,
+            "user": "wialon"
+        }
+    }
+]

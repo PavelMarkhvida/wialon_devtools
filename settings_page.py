@@ -58,7 +58,7 @@ class SettingsPage(QtWidgets.QWidget):
 		settings_gr.setLayout(settings_lo)
 
 		page_lo.addWidget(settings_gr)
-		presets_widget = devtools_presets.PresetsWidget('Settings presets', self.apply, self.fetch, self.render_preset)
+		presets_widget = devtools_presets.PresetsWidget('Settings presets', self.apply, self.fetch, 'presets/settings.preset', self.render_preset)
 		page_lo.addWidget(presets_widget)
 		page_lo.addStretch(1)
 		page_lo.addWidget(self.status_lbl)
@@ -118,7 +118,10 @@ class SettingsPage(QtWidgets.QWidget):
 		password = self.password_le.text()
 		if password:
 			settings['password'] = password
-		settings['secure'] = self.secure_chx.checkState()
+		if self.secure_chx.checkState():
+			settings['secure'] = True
+		else:
+			settings['secure'] = False
 
 		return settings
 
