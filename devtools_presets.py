@@ -43,7 +43,8 @@ class PresetsWidget(QtWidgets.QGroupBox):
 			finish_presets = load_dlg.getFinishPresets()
 			self.save_presets(finish_presets)
 
-		self.apply_cb(loaded_preset)
+		if loaded_preset:
+			self.apply_cb(loaded_preset)
 
 	def save(self):
 		new_preset = dict()

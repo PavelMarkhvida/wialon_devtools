@@ -126,7 +126,10 @@ class WialonSDKClient():
 		return self.port
 
 	def set_secure(self, secure):
-		self.secure = secure
+		if secure != 0:
+			self.secure = True
+		else:
+			self.secure = False
 
 	def is_secure(self):
 		return self.secure
@@ -138,7 +141,7 @@ class WialonSDKClient():
 		return self.sid
 
 	def get_protocol(self):
-		if self.is_secure:
+		if self.is_secure():
 			return 'https'
 		else:
 			return 'http'

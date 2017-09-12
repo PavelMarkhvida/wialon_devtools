@@ -88,6 +88,11 @@ class SettingsPage(QtWidgets.QWidget):
 		self.secure_chx.setChecked(self.wc.is_secure())
 
 	def apply(self, settings):
+		self.host_le.setText('')
+		self.port_le.setText('')
+		self.user_le.setText('')
+		self.password_le.setText('')
+		self.sid_le.setText('')
 		if not settings or 'preset' not in settings:
 			self.status_lbl.showMessage('Failed to load preset')
 			return
@@ -101,7 +106,6 @@ class SettingsPage(QtWidgets.QWidget):
 			self.password_le.setText(settings['preset']['password'])
 		if 'secure' in settings['preset']:
 			self.secure_chx.setChecked(settings['preset']['secure'])
-		self.sid_le.setText('')
 		self.status_lbl.showMessage('Loaded preset {}'.format(settings['name']))
 
 	def fetch(self):
