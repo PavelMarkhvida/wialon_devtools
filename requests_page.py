@@ -2,6 +2,7 @@ from PyQt5 import QtWidgets
 import json
 import wialon_sdk_client
 import devtools_params
+import devtools_presets
 import devtools_jstable
 
 
@@ -27,11 +28,11 @@ class RequestsPage(QtWidgets.QWidget):
 		self.copy_btn = QtWidgets.QPushButton('Copy')
 		self.copy_btn.clicked.connect(self.copyParamsToBuffer)
 
-		self.status_label = QtWidgets.QStatusBar()
+		self.status_lbl = QtWidgets.QStatusBar()
 		self.initPage()
 
 	def initPage(self):
-		page_layout = QtWidgets.QVBoxLayout()
+		page_lo = QtWidgets.QVBoxLayout()
 		main_layout = QtWidgets.QHBoxLayout()
 
 		left_lo = QtWidgets.QVBoxLayout()
@@ -69,35 +70,36 @@ class RequestsPage(QtWidgets.QWidget):
 		
 		main_layout.addLayout(left_lo)
 		main_layout.addLayout(right_lo)
-		main_layout.setStretch(0, 1)
 		main_layout.setStretch(1, 2)
 
-		page_layout.addLayout(main_layout)
-		page_layout.addWidget(self.status_label)
+		page_lo.addLayout(main_layout)
+		presets_widget = devtools_presets.PresetsWidget('Request presets', self.apply, self.fetch, 'presets/requests.preset', self.render_preset)
+		page_lo.addWidget(presets_widget)
+		page_lo.addWidget(self.status_lbl)
 
-		self.setLayout(page_layout)
+		self.setLayout(page_lo)
 		self.updateParamsWidget()
 
 	def executeRequest(self):
 		target = self.target.text()
 		if not target:
-			self.status_label.showMessage('Target is invalid')
+			self.status_lbl.showMessage('Target is invalid')
 			return
 		command = self.command.text()
 		if not command:
-			self.status_label.showMessage('Command is invalid')
+			self.status_lbl.showMessage('Command is invalid')
 			return
-		self.status_label.showMessage('Making request...')
+		self.status_lbl.showMessage('Making request...')
 		svc = target + '/' + command
 		self.send_btn.setEnabled(False)
 		self.wc.execute_request(svc, self.request_params, self.handleExecute)
 
 	def handleExecute(self, error, response):
 		if not error:
-			self.status_label.showMessage('Response received')
-			devtools_jstable.render(self.response_table, response)
+			self.status_lbl.showMessage('Response received')
+			self.updateResponseWidget(response)
 		else:
-			self.status_label.showMessage(str(response))
+			self.status_lbl.showMessage(str(response))
 
 		self.send_btn.setEnabled(True)
 
@@ -117,6 +119,9 @@ class RequestsPage(QtWidgets.QWidget):
 
 		self.params_layout.addWidget(params_scrl_area)
 
+	def updateResponseWidget(self, response_data):
+		devtools_jstable.render(self.response_table, response_data)
+
 	def pasteParamsFromBuffer(self):
 		clipped = self.clipboard.text()
 		self.request_params = json.loads(clipped)
@@ -124,4 +129,51 @@ class RequestsPage(QtWidgets.QWidget):
 
 	def copyParamsToBuffer(self):
 		self.clipboard.setText(json.dumps(self.request_params, indent=4))
+
+	# Methods for presets widget
+
+	def apply(self, preset_to_apply):
+		self.target.setText('')
+		self.command.setText('')
+		self.request_params = {}
+		self.updateResponseWidget({})
+
+		if not preset_to_apply or 'preset' not in preset_to_apply:
+			self.status_lbl.showMessage('Failed to load preset')
+			self.updateParamsWidget()
+			return
+		if 'target' in preset_to_apply['preset']:
+			self.target.setText(preset_to_apply['preset']['target'])
+		if 'command' in preset_to_apply['preset']:
+			self.command.setText(preset_to_apply['preset']['command'])
+		if 'request_params' in preset_to_apply['preset']:
+			self.request_params = json.loads(preset_to_apply['preset']['request_params'])
+
+		self.updateParamsWidget()
+		self.status_lbl.showMessage('Loaded preset {}'.format(preset_to_apply['name']))
+
+	def fetch(self):
+		new_preset = {}
+		target = self.target.text()
+		if target:
+			new_preset['target'] = target
+		command = self.command.text()
+		if command:
+			new_preset['command'] = command
+		
+		new_preset['request_params'] = json.dumps(self.request_params)
+
+		return new_preset
+
+	def render_preset(self, preset):
+		target = None
+		command = None
+		
+		if 'target' in preset:
+			target = preset['target']
+		if 'command' in preset:
+			command = preset['command']
+		
+		return '{}/{}'.format(target, command)
+
 

@@ -53,7 +53,7 @@ class PresetsWidget(QtWidgets.QGroupBox):
 			new_preset['name'] = preset_name[0]
 			new_preset['preset'] = self.fetch_cb()
 			loaded_presets = self.load_presets()
-			if not loaded_presets:
+			if loaded_presets == None:
 				return
 			loaded_presets.append(new_preset)
 			self.save_presets(loaded_presets)

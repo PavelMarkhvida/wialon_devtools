@@ -87,47 +87,49 @@ class SettingsPage(QtWidgets.QWidget):
 		self.sid_le.setText(self.wc.get_sid())
 		self.secure_chx.setChecked(self.wc.is_secure())
 
-	def apply(self, settings):
+	# Methods for presets widget
+
+	def apply(self, preset_to_apply):
 		self.host_le.setText('')
 		self.port_le.setText('')
 		self.user_le.setText('')
 		self.password_le.setText('')
 		self.sid_le.setText('')
-		if not settings or 'preset' not in settings:
+		if not preset_to_apply or 'preset' not in preset_to_apply:
 			self.status_lbl.showMessage('Failed to load preset')
 			return
-		if 'host' in settings['preset']:
-			self.host_le.setText(settings['preset']['host'])
-		if 'port' in settings['preset']:
-			self.port_le.setText(str(settings['preset']['port']))
-		if 'user' in settings['preset']:
-			self.user_le.setText(settings['preset']['user'])
-		if 'password' in settings['preset']:
-			self.password_le.setText(settings['preset']['password'])
-		if 'secure' in settings['preset']:
-			self.secure_chx.setChecked(settings['preset']['secure'])
-		self.status_lbl.showMessage('Loaded preset {}'.format(settings['name']))
+		if 'host' in preset_to_apply['preset']:
+			self.host_le.setText(preset_to_apply['preset']['host'])
+		if 'port' in preset_to_apply['preset']:
+			self.port_le.setText(str(preset_to_apply['preset']['port']))
+		if 'user' in preset_to_apply['preset']:
+			self.user_le.setText(preset_to_apply['preset']['user'])
+		if 'password' in preset_to_apply['preset']:
+			self.password_le.setText(preset_to_apply['preset']['password'])
+		if 'secure' in preset_to_apply['preset']:
+			self.secure_chx.setChecked(preset_to_apply['preset']['secure'])
+		self.status_lbl.showMessage('Loaded preset {}'.format(preset_to_apply['name']))
 
 	def fetch(self):
-		settings = {}
+		new_preset = {}
 		host = self.host_le.text()
 		if host:
-			settings['host'] = host
+			new_preset['host'] = host
 		port = self.port_le.text()
 		if port:
-			settings['port'] = port
+			new_preset['port'] = port
 		user = self.user_le.text()
 		if user:
-			settings['user'] = user
+			new_preset['user'] = user
 		password = self.password_le.text()
 		if password:
-			settings['password'] = password
+			new_preset['password'] = password
 		if self.secure_chx.checkState():
-			settings['secure'] = True
+			new_preset['secure'] = True
 		else:
-			settings['secure'] = False
+			new_preset['secure'] = False
 
-		return settings
+		return new_preset
 
 	def render_preset(self, preset):
 		host = None
