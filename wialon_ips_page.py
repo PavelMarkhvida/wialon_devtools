@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 import wialon_ips_client
 import datetime
 
@@ -11,6 +11,8 @@ class WialonIPSPage(QtWidgets.QWidget):
 
 		self.ip_le = QtWidgets.QLineEdit('193.193.165.165')
 		self.port_le = QtWidgets.QLineEdit('20332')
+		port_validator = QtGui.QIntValidator(1000, 40000)
+		self.port_le.setValidator(port_validator)
 		self.obj_id_le = QtWidgets.QLineEdit()
 		self.obj_id_le.textChanged.connect(self.obj_id_le_handler)
 		self.obj_password_le = QtWidgets.QLineEdit()
@@ -29,9 +31,14 @@ class WialonIPSPage(QtWidgets.QWidget):
 		self.speed_le = QtWidgets.QLineEdit()
 		self.course_le = QtWidgets.QLineEdit()
 		self.height_le = QtWidgets.QLineEdit()
+		self.sats_le = QtWidgets.QLineEdit()
 
 		self.send_btn = QtWidgets.QPushButton('Send')
 		self.send_btn.clicked.connect(self.sendMessage)
+
+		self.file_path_le = QtWidgets.QLineEdit()
+		self.send_file_btn = QtWidgets.QPushButton('Send file')
+		self.send_file_btn.clicked.connect(self.sendFile)
 
 		self.log_te = QtWidgets.QTextEdit()
 		self.log_te.setReadOnly(True)
@@ -92,8 +99,14 @@ class WialonIPSPage(QtWidgets.QWidget):
 		short_msg_lo.addRow('Lat', self.lat_le)
 		short_msg_lo.addRow('Lon', self.lon_le)
 		short_msg_lo.addRow('Speed', self.speed_le)
-		short_msg_lo.addRow('Height', self.height_le)
 		short_msg_lo.addRow('Course', self.course_le)
+		short_msg_lo.addRow('Height', self.height_le)
+		short_msg_lo.addRow('Sats', self.sats_le)
+		short_msg_lo.addRow(self.send_btn)
+
+		short_msg_lo.addRow(self.file_path_le)
+		short_msg_lo.addRow(self.send_file_btn)
+
 		msgs_lo.addLayout(short_msg_lo)
 		msgs_lo.addStretch(1)
 		msg_gr.setLayout(msgs_lo)
@@ -147,7 +160,17 @@ class WialonIPSPage(QtWidgets.QWidget):
 		self.log_te.append(current_time + msg)
 
 	def sendMessage(self):
-		pass
+		lat = self.lat_le.text()
+		lon = self.lon_le.text()
+		speed = self.speed_le.text()
+		course = self.course_le.text()
+		height = self.height_le.text()
+		sats = self.sats_le.text()
+		self.wc.send_short_data(None, None, lat, lon, speed, course, height, sats)
+
+	def sendFile(self):
+		file_path = self.file_path_le.text()
+		self.wc.send_file(file_path)
 
 	def obj_id_le_handler(self):
 		if self.wc_connected and self.obj_id_le.text():

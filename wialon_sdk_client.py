@@ -110,7 +110,7 @@ class WialonSDKClient():
 			cb(1, 'Request failed')
 			return
 
-		response = json.loads(reply.readAll().data().decode('ascii'))
+		response = json.loads(reply.readAll().data().decode('utf-8'))
 		cb(0, response)
 
 	def set_host(self, ip):
