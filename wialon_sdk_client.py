@@ -108,7 +108,7 @@ class WialonSDKClient():
 			'params': json.dumps(params)
 		}
 
-		self.post(service_url, request, self.finish_execute, cb)
+		return self.post(service_url, request, self.finish_execute, cb)
 
 	def finish_execute(self, reply, cb):
 		if reply.error() != QtNetwork.QNetworkReply.NoError:

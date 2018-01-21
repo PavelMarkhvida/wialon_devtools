@@ -16,6 +16,9 @@ class RequestsPage(QtWidgets.QWidget):
 		self.command = QtWidgets.QLineEdit('search_items')
 		self.send_btn = QtWidgets.QPushButton('Send')
 		self.send_btn.clicked.connect(self.executeRequest)
+		self.cancel_btn = QtWidgets.QPushButton('Cancel')
+		self.cancel_btn.setEnabled(False)
+		self.cancel_btn.clicked.connect(self.cancelRequest)
 
 		self.response_table = QtWidgets.QTableView()
 
@@ -65,6 +68,7 @@ class RequestsPage(QtWidgets.QWidget):
 		right_title_lo.addWidget(self.paste_btn)
 		right_title_lo.addStretch(1)
 		right_title_lo.addWidget(self.send_btn)
+		right_title_lo.addWidget(self.cancel_btn)
 		right_lo.addLayout(right_title_lo)
 		right_lo.addLayout(self.params_layout)
 		
@@ -92,7 +96,11 @@ class RequestsPage(QtWidgets.QWidget):
 		self.status_lbl.showMessage('Making request...')
 		svc = target + '/' + command
 		self.send_btn.setEnabled(False)
-		self.wc.execute_request(svc, self.request_params, self.handleExecute)
+		self.cancel_btn.setEnabled(True)
+		self.request_rt = self.wc.execute_request(svc, self.request_params, self.handleExecute)
+
+	def cancelRequest(self):
+		self.request_rt.cancel()
 
 	def handleExecute(self, error, response):
 		if not error:
@@ -102,6 +110,7 @@ class RequestsPage(QtWidgets.QWidget):
 			self.status_lbl.showMessage(str(response))
 
 		self.send_btn.setEnabled(True)
+		self.cancel_btn.setEnabled(False)
 
 	def updateParamsWidget(self):
 		# delete old params widget
