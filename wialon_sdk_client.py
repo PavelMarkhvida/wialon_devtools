@@ -1,6 +1,11 @@
 from PyQt5 import QtCore, QtNetwork
 import json
 
+class RequestToken(QtCore.QObject):
+	cancelled = QtCore.pyqtSignal()
+	def cancel(self):
+		self.cancelled.emit()
+
 
 class WialonSDKClient():
 	def __init__(self):
@@ -38,7 +43,7 @@ class WialonSDKClient():
 			'access_type': 0x100
 		}
 
-		self.post(login_url, request, self.finish_login, cb)
+		return self.post(login_url, request, self.finish_login, cb)
 
 	def token_login(self, access_token, cb):
 		token_url = '{}://{}:{}/wialon/ajax.html'.format(self.get_protocol(), self.host, self.port)
@@ -153,9 +158,12 @@ class WialonSDKClient():
 		qurl = QtCore.QUrl(url)
 		request = QtNetwork.QNetworkRequest(qurl)
 		request.setHeader(QtNetwork.QNetworkRequest.ContentTypeHeader, "application/x-www-form-urlencoded")
+		rt = RequestToken()
 		reply = self.nm.post(request, body)
-		reply.ignoreSslErrors()
+		rt.cancelled.connect(reply.abort)
 		reply.finished.connect(callback_factory(reply=reply, cb=cb, cb_args=cb_args))
+		reply.ignoreSslErrors()
+		return rt
 
 
 def callback_factory(*factory_args, **factory_kwargs):

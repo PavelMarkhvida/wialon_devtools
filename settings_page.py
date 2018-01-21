@@ -8,27 +8,33 @@ class SettingsPage(QtWidgets.QWidget):
 		super().__init__()
 		self.wc = wialon_client
 
+		# Connection widgets
 		self.host_le = QtWidgets.QLineEdit()
 		self.port_le = QtWidgets.QLineEdit()
 		self.sid_le = QtWidgets.QLineEdit()
+		self.secure_chx = QtWidgets.QCheckBox()
 
+		# Credentials widgets
 		self.user_le = QtWidgets.QLineEdit()
 		self.password_le = QtWidgets.QLineEdit()
 		self.password_le.setEchoMode(QtWidgets.QLineEdit.Password)
 		self.login_btn = QtWidgets.QPushButton('Login')
-
-		self.secure_chx = QtWidgets.QCheckBox()
+		self.login_cancel_btn = QtWidgets.QPushButton('Cancel')
+		self.login_cancel_btn.setEnabled(False)
 
 		self.status_lbl = QtWidgets.QStatusBar()
 		self.initPage()
 
 	def initPage(self):
+		# bind widgets to wialon_sdk_client
 		self.host_le.textChanged.connect(self.wc.set_host)
 		self.port_le.textChanged.connect(self.wc.set_port)
 		self.sid_le.textChanged.connect(self.wc.set_sid)
 		self.secure_chx.stateChanged.connect(self.wc.set_secure)
 		self.login_btn.clicked.connect(self.try_login)
+		self.login_cancel_btn.clicked.connect(self.cancel_login)
 
+		# draw layout
 		page_lo = QtWidgets.QVBoxLayout()
 		
 		settings_gr = QtWidgets.QGroupBox('Settings')
@@ -46,8 +52,8 @@ class SettingsPage(QtWidgets.QWidget):
 		login_btn_lo = QtWidgets.QHBoxLayout()
 		login_btn_lo.addStretch(1)
 		login_btn_lo.addWidget(self.login_btn)
+		login_btn_lo.addWidget(self.login_cancel_btn)
 		credentials_lo.addRow(login_btn_lo)
-
 
 		settings_lo.addLayout(host_settings_lo)
 		settings_lo.addLayout(credentials_lo)
@@ -68,18 +74,22 @@ class SettingsPage(QtWidgets.QWidget):
 		presets_widget.load(True)
 
 	def try_login(self):
+		# Login button clicked - disable some widgets and try to login with sdk client
 		self.login_btn.setEnabled(False)
+		self.login_cancel_btn.setEnabled(True)
 		self.sid_le.setEnabled(False)
 		self.status_lbl.showMessage('Trying to login')
 		user = self.user_le.text()
 		password = self.password_le.text()
-		login_result = self.wc.login(user, password, self.handle_login)
+		self.login_rt = self.wc.login(user, password, self.handle_login)
 
 	def handle_login(self, error, status):
+		# callback called after login attempt
 		self.status_lbl.showMessage(status)
 		self.updatePage()
 		self.sid_le.setEnabled(True)
 		self.login_btn.setEnabled(True)
+		self.login_cancel_btn.setEnabled(False)
 
 	def updatePage(self):
 		self.host_le.setText(self.wc.get_host())
@@ -87,17 +97,22 @@ class SettingsPage(QtWidgets.QWidget):
 		self.sid_le.setText(self.wc.get_sid())
 		self.secure_chx.setChecked(self.wc.is_secure())
 
-	# Methods for presets widget
+	def cancel_login(self):
+		self.login_rt.cancel()
+
+	# Callback methods for presets widget
 
 	def apply(self, preset_to_apply):
+		if not preset_to_apply or 'preset' not in preset_to_apply:
+			self.status_lbl.showMessage('Failed to load preset')
+			return
+
 		self.host_le.setText('')
 		self.port_le.setText('')
 		self.user_le.setText('')
 		self.password_le.setText('')
 		self.sid_le.setText('')
-		if not preset_to_apply or 'preset' not in preset_to_apply:
-			self.status_lbl.showMessage('Failed to load preset')
-			return
+
 		if 'host' in preset_to_apply['preset']:
 			self.host_le.setText(preset_to_apply['preset']['host'])
 		if 'port' in preset_to_apply['preset']:
@@ -108,6 +123,7 @@ class SettingsPage(QtWidgets.QWidget):
 			self.password_le.setText(preset_to_apply['preset']['password'])
 		if 'secure' in preset_to_apply['preset']:
 			self.secure_chx.setChecked(preset_to_apply['preset']['secure'])
+
 		self.status_lbl.showMessage('Loaded preset {}'.format(preset_to_apply['name']))
 
 	def fetch(self):
