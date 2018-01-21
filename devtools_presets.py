@@ -60,14 +60,24 @@ class PresetsWidget(QtWidgets.QGroupBox):
 
 	def load_presets(self):
 		presets = None
-		with open(self.path, 'r') as presets_file:
-			presets = json.load(presets_file)
+		try:
+			with open(self.path, 'r') as presets_file:
+				try:
+					presets = json.load(presets_file)
+				except json.JSONDecodeError:
+					print('Failed to load presets')
+					return []
+		except FileNotFoundError:
+			print('Incorrect presets path')
+			return []
 		return presets
 
 	def save_presets(self, updated_presets):
-		with open(self.path, 'w') as presets_file:
-			json.dump(updated_presets, presets_file, indent=4)
-
+		try:
+			with open(self.path, 'w') as presets_file:
+				json.dump(updated_presets, presets_file, indent=4)
+		except FileNotFoundError:
+			print('Incorrect presets path')
 
 
 class PresetsLoadDialog(QtWidgets.QDialog):
