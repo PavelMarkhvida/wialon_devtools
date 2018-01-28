@@ -53,6 +53,15 @@ class Presets(QtCore.QAbstractTableModel):
 				value = widget.text()
 				if value:
 					new_preset['preset'][widget_name] = value
+			elif type(widget) is QtWidgets.QTextEdit:
+				value = widget.toPlainText()
+				if value:
+					try:
+						# drop json formatting
+						value = json.dumps(json.loads(value))
+					except:
+						pass
+					new_preset['preset'][widget_name] = value
 			elif type(widget) is QtWidgets.QCheckBox:
 				value = widget.checkState()
 				if value:
@@ -123,7 +132,7 @@ class Presets(QtCore.QAbstractTableModel):
 			widget = w['widget']
 			if not widget or not widget_name:
 				continue
-			if type(widget) is QtWidgets.QLineEdit:
+			if type(widget) is QtWidgets.QLineEdit or type(widget) is QtWidgets.QTextEdit:
 				if widget_name in preset_params:
 					widget.setText(str(preset_params[widget_name]))
 				else:

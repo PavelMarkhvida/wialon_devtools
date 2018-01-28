@@ -74,10 +74,13 @@ class WialonSDKClient():
 			cb(1, 'Auth failed')
 			return
 
-		response = json.loads(reply.readAll().data().decode('utf-8'))
+		try:
+			response = json.loads(reply.readAll().data().decode('utf-8'))
+			self.sid = response['eid']
+			cb(0, 'Auth successfull')
+		except:
+			cb(1, 'Auth failed')
 
-		self.sid = response['eid']
-		cb(0, 'Auth successfull')
 
 	def execute_request(self, svc, params, cb):
 		if not svc:
@@ -105,7 +108,7 @@ class WialonSDKClient():
 		request = {
 			'sid': self.sid,
 			'svc': svc,
-			'params': json.dumps(params)
+			'params': params
 		}
 
 		return self.post(service_url, request, self.finish_execute, cb)
@@ -115,8 +118,11 @@ class WialonSDKClient():
 			cb(1, 'Request failed')
 			return
 
-		response = json.loads(reply.readAll().data().decode('utf-8'))
-		cb(0, response)
+		try:
+			response = json.loads(reply.readAll().data().decode('utf-8'))
+			cb(0, response)
+		except:
+			cb(1, reply.readAll().data().decode('utf-8'))
 
 	def set_host(self, ip):
 		self.host = ip
