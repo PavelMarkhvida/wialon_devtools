@@ -10,31 +10,31 @@ class RequestsPage(QtWidgets.QWidget):
 	def __init__(self, wialon_client):
 		super().__init__()
 		self.wc = wialon_client
+		self.clipboard = QtWidgets.QApplication.clipboard()
 		self.request_params = {"spec":{"itemsType":"avl_unit","propName":"*","propValueMask":"*","sortType":""},"force":1,"flags":1,"from":0,"to":0}
 
 		self.target = QtWidgets.QLineEdit('core')
 		self.command = QtWidgets.QLineEdit('search_items')
 		self.send_btn = QtWidgets.QPushButton('Send')
-		self.send_btn.clicked.connect(self.executeRequest)
 		self.cancel_btn = QtWidgets.QPushButton('Cancel')
 		self.cancel_btn.setEnabled(False)
-		self.cancel_btn.clicked.connect(self.cancelRequest)
-
-		self.response_table = QtWidgets.QTableView()
-
-		self.clipboard = QtWidgets.QApplication.clipboard()
 
 		self.params_layout = QtWidgets.QVBoxLayout()
-		self.paste_btn = QtWidgets.QPushButton('Paste')
-		self.paste_btn.clicked.connect(self.pasteParamsFromBuffer)
 
 		self.copy_btn = QtWidgets.QPushButton('Copy')
-		self.copy_btn.clicked.connect(self.copyParamsToBuffer)
+		self.paste_btn = QtWidgets.QPushButton('Paste')
+
+		self.response_table = QtWidgets.QTableView()
 
 		self.status_lbl = QtWidgets.QStatusBar()
 		self.initPage()
 
 	def initPage(self):
+		self.send_btn.clicked.connect(self.executeRequest)
+		self.cancel_btn.clicked.connect(self.cancelRequest)
+		self.copy_btn.clicked.connect(self.copyParamsToBuffer)
+		self.paste_btn.clicked.connect(self.pasteParamsFromBuffer)
+
 		page_lo = QtWidgets.QVBoxLayout()
 		main_layout = QtWidgets.QHBoxLayout()
 

@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets
 import wialon_sdk_client
-import devtools_presets
+import presets
 
 
 class SettingsPage(QtWidgets.QWidget):
@@ -64,14 +64,47 @@ class SettingsPage(QtWidgets.QWidget):
 		settings_gr.setLayout(settings_lo)
 
 		page_lo.addWidget(settings_gr)
-		presets_widget = devtools_presets.PresetsWidget('Settings presets', self.apply, self.fetch, 'presets/settings.preset', self.render_preset)
+		presets_widget = presets.PresetsWidget({
+				"name": "Settings presets",
+				"path": "presets_backup/settings.preset",
+				"widgets": [
+					{
+						"name": "host",
+						"widget": self.host_le
+					},
+					{
+						"name": "port",
+						"widget": self.port_le
+					},
+					{
+						"name": "secure",
+						"widget": self.secure_chx
+					},
+					{
+						"name": "user",
+						"widget": self.user_le
+					},
+					{
+						"name": "password",
+						"widget": self.password_le
+					}
+				]
+			})
 		page_lo.addWidget(presets_widget)
 		page_lo.addStretch(1)
 		page_lo.addWidget(self.status_lbl)
 
 		self.setLayout(page_lo)
+		# init widgets with wialon_sdk_client state
 		self.updatePage()
-		presets_widget.load(True)
+
+	def updatePage(self):
+		self.host_le.setText(self.wc.get_host())
+		self.port_le.setText(str(self.wc.get_port()))
+		self.sid_le.setText(self.wc.get_sid())
+		self.secure_chx.setChecked(self.wc.is_secure())
+
+	# Login routines
 
 	def try_login(self):
 		# Login button clicked - disable some widgets and try to login with sdk client
@@ -81,85 +114,15 @@ class SettingsPage(QtWidgets.QWidget):
 		self.status_lbl.showMessage('Trying to login')
 		user = self.user_le.text()
 		password = self.password_le.text()
-		self.login_rt = self.wc.login(user, password, self.handle_login)
+		self.login_rt = self.wc.login(user, password, self.finish_login)
 
-	def handle_login(self, error, status):
+	def cancel_login(self):
+		self.login_rt.cancel()
+
+	def finish_login(self, error, status):
 		# callback called after login attempt
 		self.status_lbl.showMessage(status)
 		self.updatePage()
 		self.sid_le.setEnabled(True)
 		self.login_btn.setEnabled(True)
 		self.login_cancel_btn.setEnabled(False)
-
-	def updatePage(self):
-		self.host_le.setText(self.wc.get_host())
-		self.port_le.setText(str(self.wc.get_port()))
-		self.sid_le.setText(self.wc.get_sid())
-		self.secure_chx.setChecked(self.wc.is_secure())
-
-	def cancel_login(self):
-		self.login_rt.cancel()
-
-	# Callback methods for presets widget
-
-	def apply(self, preset_to_apply):
-		if not preset_to_apply or 'preset' not in preset_to_apply:
-			self.status_lbl.showMessage('Failed to load preset')
-			return
-
-		self.host_le.setText('')
-		self.port_le.setText('')
-		self.user_le.setText('')
-		self.password_le.setText('')
-		self.sid_le.setText('')
-
-		if 'host' in preset_to_apply['preset']:
-			self.host_le.setText(preset_to_apply['preset']['host'])
-		if 'port' in preset_to_apply['preset']:
-			self.port_le.setText(str(preset_to_apply['preset']['port']))
-		if 'user' in preset_to_apply['preset']:
-			self.user_le.setText(preset_to_apply['preset']['user'])
-		if 'password' in preset_to_apply['preset']:
-			self.password_le.setText(preset_to_apply['preset']['password'])
-		if 'secure' in preset_to_apply['preset']:
-			self.secure_chx.setChecked(preset_to_apply['preset']['secure'])
-
-		self.status_lbl.showMessage('Loaded preset {}'.format(preset_to_apply['name']))
-
-	def fetch(self):
-		new_preset = {}
-		host = self.host_le.text()
-		if host:
-			new_preset['host'] = host
-		port = self.port_le.text()
-		if port:
-			new_preset['port'] = port
-		user = self.user_le.text()
-		if user:
-			new_preset['user'] = user
-		password = self.password_le.text()
-		if password:
-			new_preset['password'] = password
-		if self.secure_chx.checkState():
-			new_preset['secure'] = True
-		else:
-			new_preset['secure'] = False
-
-		return new_preset
-
-	def render_preset(self, preset):
-		host = None
-		port = None
-		secure = None
-		user = None
-		if 'host' in preset:
-			host = preset['host']
-		if 'port' in preset:
-			port = preset['port']
-		if 'secure' in preset:
-			secure = preset['secure']
-		if 'user' in preset:
-			user = preset['user']
-
-		return '{}, {}, {}, {}'.format(host, port, secure, user)
-
