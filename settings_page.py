@@ -109,12 +109,12 @@ class SettingsPage(QtWidgets.QWidget):
 	def try_login(self):
 		# Login button clicked - disable some widgets and try to login with sdk client
 		self.login_btn.setEnabled(False)
-		self.login_cancel_btn.setEnabled(True)
 		self.sid_le.setEnabled(False)
 		self.status_lbl.showMessage('Trying to login')
 		user = self.user_le.text()
 		password = self.password_le.text()
 		self.login_rt = self.wc.login(user, password, self.finish_login)
+		self.login_cancel_btn.setEnabled(True)
 
 	def cancel_login(self):
 		self.login_rt.cancel()
