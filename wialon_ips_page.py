@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtWidgets, QtGui, QtPositioning
 import wialon_ips_client
 import datetime
 
@@ -33,6 +33,10 @@ class WialonIPSPage(QtWidgets.QWidget):
 		self.height_le = QtWidgets.QLineEdit()
 		self.sats_le = QtWidgets.QLineEdit()
 
+		self.pos_src = QtPositioning.QGeoPositionInfoSource.createDefaultSource(self)
+		self.pos_src.positionUpdated.connect(self.pos_upd)
+		self.pos_src.requestUpdate()
+
 		self.send_btn = QtWidgets.QPushButton('Send')
 		self.send_btn.clicked.connect(self.sendMessage)
 
@@ -54,6 +58,7 @@ class WialonIPSPage(QtWidgets.QWidget):
 		self.port_le.textChanged.connect(self.wc.set_port)
 
 		self.initPage()
+
 
 	def initPage(self):
 		page_lo = QtWidgets.QVBoxLayout()
@@ -124,30 +129,37 @@ class WialonIPSPage(QtWidgets.QWidget):
 
 		self.setLayout(page_lo)
 
+
 	def connectToWialonIPSServer(self):
 		self.connect_btn.setEnabled(False)
 		connect_res = self.wc.connect()
 
+
 	def disconnectFromWialonIPSServer(self):
 		self.wc.disconnect()
+
 
 	def handle_connected(self):
 		self.wc_connected = True
 		self.obj_id_le_handler()
+
 
 	def handle_disconnected(self):
 		self.wc_connected = False
 		self.connect_btn.setEnabled(True)
 		self.obj_id_le_handler()
 
+
 	def handle_error(self):
 		self.wc_connected = False
 		self.connect_btn.setEnabled(True)
+
 
 	def loginToWialonIPSServer(self):
 		object_id = self.obj_id_le.text()
 		object_password = self.obj_password_le.text()
 		self.wc.login(object_id, object_password)
+
 
 	def logger(self, msg):
 		current_time = datetime.datetime.now().strftime("<i>[%H:%M:%S.%f]</i> ... ")
@@ -159,6 +171,7 @@ class WialonIPSPage(QtWidgets.QWidget):
 			msg_to_print = msg[:-1]
 		self.log_te.append(current_time + msg)
 
+
 	def sendMessage(self):
 		lat = self.lat_le.text()
 		lon = self.lon_le.text()
@@ -166,14 +179,23 @@ class WialonIPSPage(QtWidgets.QWidget):
 		course = self.course_le.text()
 		height = self.height_le.text()
 		sats = self.sats_le.text()
-		self.wc.send_short_data(None, None, lat, lon, speed, course, height, sats)
+		self.wc.send_short_data(lat, lon, speed, course, height, sats)
+
 
 	def sendFile(self):
 		file_path = self.file_path_le.text()
 		self.wc.send_file(file_path)
+
 
 	def obj_id_le_handler(self):
 		if self.wc_connected and self.obj_id_le.text():
 			self.login_btn.setEnabled(True)
 		else:
 			self.login_btn.setEnabled(False)
+
+
+	def pos_upd(self, pos):
+		if not self.lat_le.text() and not self.lon_le.text():
+			self.lat_le.setText(str(pos.coordinate().latitude()))
+			self.lon_le.setText(str(pos.coordinate().longitude()))
+

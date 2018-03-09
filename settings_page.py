@@ -126,3 +126,4 @@ class SettingsPage(QtWidgets.QWidget):
 		self.sid_le.setEnabled(True)
 		self.login_btn.setEnabled(True)
 		self.login_cancel_btn.setEnabled(False)
+
