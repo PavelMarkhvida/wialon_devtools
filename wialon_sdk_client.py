@@ -40,7 +40,7 @@ class WialonSDKClient():
 			'activation_time': 0,
 			'duration': 43200, # 12 hours
 			'redirect_uri': 'devtools://redir',
-			'access_type': 0x100
+			'access_type': -1
 		}
 
 		return self.post(login_url, request, self.finish_login, cb)
