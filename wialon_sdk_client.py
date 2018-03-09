@@ -33,12 +33,12 @@ class WialonSDKClient():
 		login_url = '{}://{}:{}/oauth/authorize.html'.format(self.get_protocol(), self.host, self.port)
 
 		request = {
-			'client_id': 'Devtools',
+			'client_id': 'WialonDevtools',
 			'login': user,
 			'passw': password,
 			'response_type': 'token',
 			'activation_time': 0,
-			'duration': 22592000,
+			'duration': 43200, # 12 hours
 			'redirect_uri': 'devtools://redir',
 			'access_type': 0x100
 		}
@@ -46,6 +46,18 @@ class WialonSDKClient():
 		return self.post(login_url, request, self.finish_login, cb)
 
 	def token_login(self, access_token, cb):
+		if not self.host:
+			cb(1, 'Host isn\'t specified')
+			return
+
+		if not self.port:
+			cb(1, 'Port isn\'t specified')
+			return
+
+		if not access_token:
+			cb(1, 'Please, provide token')
+			return
+
 		token_url = '{}://{}:{}/wialon/ajax.html'.format(self.get_protocol(), self.host, self.port)
 
 		request = {

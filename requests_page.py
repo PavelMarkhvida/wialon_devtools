@@ -12,8 +12,8 @@ class RequestsPage(QtWidgets.QWidget):
 		self.wc = wialon_client
 		self.clipboard = QtWidgets.QApplication.clipboard()
 
-		self.target = QtWidgets.QLineEdit('core')
-		self.command = QtWidgets.QLineEdit('search_items')
+		self.target = QtWidgets.QLineEdit()
+		self.command = QtWidgets.QLineEdit()
 		self.send_btn = QtWidgets.QPushButton('Send')
 		self.cancel_btn = QtWidgets.QPushButton('Cancel')
 		self.cancel_btn.setEnabled(False)
@@ -27,6 +27,7 @@ class RequestsPage(QtWidgets.QWidget):
 
 		self.status_lbl = QtWidgets.QStatusBar()
 		self.initPage()
+
 
 	def initPage(self):
 		self.send_btn.clicked.connect(self.executeRequest)
@@ -42,7 +43,7 @@ class RequestsPage(QtWidgets.QWidget):
 		left_lo = QtWidgets.QVBoxLayout()
 
 		command_lo = QtWidgets.QVBoxLayout()
-		command_lo.addWidget(QtWidgets.QLabel('<b>Service</b>'))
+		command_lo.addWidget(QtWidgets.QLabel('<b>Target/Command</b>'))
 
 		sdk_command_lo = QtWidgets.QHBoxLayout()
 		sdk_command_lo.addWidget(self.target)
@@ -57,7 +58,7 @@ class RequestsPage(QtWidgets.QWidget):
 
 		right_lo = QtWidgets.QVBoxLayout()
 		right_title_lo = QtWidgets.QHBoxLayout()
-		right_title_lo.addWidget(QtWidgets.QLabel('<b>Service parameters</b>'))
+		right_title_lo.addWidget(QtWidgets.QLabel('<b>Parameters</b>'))
 		right_title_lo.addStretch(1)
 		right_title_lo.addWidget(self.format_btn)
 		right_lo.addLayout(right_title_lo)
@@ -97,6 +98,7 @@ class RequestsPage(QtWidgets.QWidget):
 
 		self.setLayout(page_lo)
 
+
 	def executeRequest(self):
 		target = self.target.text()
 		if not target:
@@ -112,8 +114,10 @@ class RequestsPage(QtWidgets.QWidget):
 		self.cancel_btn.setEnabled(True)
 		self.request_rt = self.wc.execute_request(svc, self.params_edit.toPlainText(), self.handleExecute)
 
+
 	def cancelRequest(self):
 		self.request_rt.cancel()
+
 
 	def handleExecute(self, error, response):
 		if not error:
@@ -126,8 +130,10 @@ class RequestsPage(QtWidgets.QWidget):
 		self.send_btn.setEnabled(True)
 		self.cancel_btn.setEnabled(False)
 
+
 	def updateResponseWidget(self):
 		devtools_jstable.render(self.response_table, self.response)
+
 
 	def formatParams(self):
 		try:
