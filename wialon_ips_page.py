@@ -1,4 +1,9 @@
 from PyQt5 import QtWidgets, QtGui, QtPositioning
+try:
+	from PyQt5 import QtWidgets, QtGui, QtPositioning
+except:
+	print('Failed to import QtPositioning module')	
+import sys
 import wialon_ips_client
 import datetime
 
@@ -27,7 +32,6 @@ class PingMessageTab(QtWidgets.QWidget):
 	def sendPingMessage(self):
 		self.wc.ping()
 
-
 class ShortDataMessageTab(QtWidgets.QWidget):
 	"""Widget for sending short data msg"""
 	def __init__(self, wc):
@@ -43,9 +47,10 @@ class ShortDataMessageTab(QtWidgets.QWidget):
 		self.send_btn = QtWidgets.QPushButton('Send')
 		self.send_btn.clicked.connect(self.sendMessage)
 
-		self.pos_src = QtPositioning.QGeoPositionInfoSource.createDefaultSource(self)
-		self.pos_src.positionUpdated.connect(self.pos_upd)
-		self.pos_src.requestUpdate()
+		if 'PyQt5.QtPositioning' in sys.modules:
+			self.pos_src = QtPositioning.QGeoPositionInfoSource.createDefaultSource(self)
+			self.pos_src.positionUpdated.connect(self.pos_upd)
+			self.pos_src.requestUpdate()
 
 		hbox_lo = QtWidgets.QHBoxLayout()
 

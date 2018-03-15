@@ -63,13 +63,21 @@ class WialonIPSClient(QtCore.QObject):
 
 
 	def send_short_data(self, lat, lon, speed, course, height, sats):
+		lat1 = 0
+		try:
+			lat1 = float(lat)
+		except:
+			pass
 		lat2 = 'N'
-		lat1 = float(lat)
 		if lat1 < 0:
 			lat2 = 'S'
 			lat1 = lat1 * -1
+		lon1 = 0
+		try:
+			lon1 = float(lon)
+		except:
+			pass
 		lon2 = 'E'
-		lon1 = float(lon)
 		if lon1 < 0:
 			lon2 = 'W'
 			lon1 = lon1 * -1
