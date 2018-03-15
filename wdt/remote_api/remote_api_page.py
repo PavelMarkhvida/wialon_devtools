@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets
-import wialon_sdk_client
-import settings_page
-import requests_page
+from wdt.remote_api import wialon_sdk_client
+from wdt.remote_api import settings_page
+from wdt.remote_api import requests_page
 
 class RemoteAPIPage(QtWidgets.QTabWidget):
 	def __init__(self):

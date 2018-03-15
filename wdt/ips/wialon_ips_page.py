@@ -4,7 +4,7 @@ try:
 except:
 	print('Failed to import QtPositioning module')	
 import sys
-import wialon_ips_client
+from wdt.ips import wialon_ips_client
 import datetime
 
 

@@ -1,9 +1,8 @@
 from PyQt5 import QtWidgets
 import json
-import wialon_sdk_client
-import devtools_params
-import devtools_preset
-import devtools_jstable
+from wdt.remote_api import wialon_sdk_client
+from wdt.dt import devtools_preset
+from wdt.dt import devtools_jstable
 
 
 class RequestsPage(QtWidgets.QWidget):
@@ -76,7 +75,7 @@ class RequestsPage(QtWidgets.QWidget):
 		page_lo.addLayout(btn_lo)
 		presets_widget = devtools_preset.PresetsWidget({
 				"name": "Request presets",
-				"path": "presets/requests.preset",
+				"file_name": "requests.preset",
 				"widgets": [
 					{
 						"name": "target",

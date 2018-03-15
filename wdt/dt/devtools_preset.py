@@ -1,10 +1,23 @@
 from PyQt5 import QtGui, QtWidgets, QtCore
 import json
+import os, appdirs
 
 class PresetsWidget(QtWidgets.QGroupBox):
 	"""Widget for applying presets to parent widget"""
 	def __init__(self, settings):
 		super().__init__(settings['name'])
+
+		presets_dir = appdirs.user_data_dir("wialon_devtools", "WialonApps")
+
+		if not os.path.exists(presets_dir):
+			os.makedirs(presets_dir)
+
+		settings['file_path'] = os.path.join(presets_dir, settings['file_name'])
+		if not os.path.exists(settings['file_path']):
+		    os.mknod(settings['file_path'])
+
+		print(settings['name'] + ' path is ' + settings['file_path'])
+
 		self.presets = Presets(settings)
 		self.save_btn = QtWidgets.QPushButton('Save')
 		self.save_btn.clicked.connect(self.presets.save_preset)
@@ -83,7 +96,7 @@ class Presets(QtCore.QAbstractTableModel):
 
 
 	def load_presets(self):
-		presets_path = self.settings['path']
+		presets_path = self.settings['file_path']
 		if not presets_path:
 			return
 		try:
@@ -103,7 +116,7 @@ class Presets(QtCore.QAbstractTableModel):
 
 
 	def dump_presets(self):
-		presets_path = self.settings['path']
+		presets_path = self.settings['file_path']
 		if not presets_path:
 			return
 		try:

@@ -1,20 +1,38 @@
 [
     {
-        "name": "Wialon Devtools",
         "preset": {
             "host": "hst-api.wialon.com",
-            "secure": true,
-            "port": 443
-        }
+            "port": 443,
+            "secure": true
+        },
+        "name": "Wialon Devtools"
     },
     {
-        "name": "Wialon Local",
         "preset": {
-            "host": "127.0.0.1",
             "password": "password",
-            "secure": false,
+            "host": "127.0.0.1",
             "port": 8021,
-            "user": "wialon"
-        }
+            "user": "wialon",
+            "secure": false
+        },
+        "name": "Wialon Local"
+    },
+    {
+        "preset": {
+            "password": "password",
+            "host": "hst-api.wialon.com",
+            "port": "443",
+            "user": "shse_test",
+            "secure": true
+        },
+        "name": "hosting"
+    },
+    {
+        "preset": {
+            "host": "hst-api.wialon.com",
+            "port": "443",
+            "secure": true
+        },
+        "name": "new_preset"
     }
 ]

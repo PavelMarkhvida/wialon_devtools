@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets
-import wialon_sdk_client
-import devtools_preset
+from wdt.remote_api import wialon_sdk_client
+from wdt.dt import devtools_preset
 
 
 class SettingsPage(QtWidgets.QWidget):
@@ -104,7 +104,7 @@ class SettingsPage(QtWidgets.QWidget):
 
 		presets_widget = devtools_preset.PresetsWidget({
 				"name": "Settings presets",
-				"path": "presets/settings.preset",
+				"file_name": "settings.preset",
 				"widgets": [
 					{
 						"name": "host",

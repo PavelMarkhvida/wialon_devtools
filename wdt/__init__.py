@@ -1,13 +1,6 @@
-#!/usr/bin/python3
-# -*- coding: utf-8 -*-
-
-"""
-Wialon Devtools
-"""
-
 import sys
-import wialon_ips_page
-import remote_api_page
+from wdt.ips import wialon_ips_page
+from wdt.remote_api import remote_api_page
 from PyQt5 import QtWidgets, QtGui
 
 
@@ -26,8 +19,7 @@ class DevtoolsWidget(QtWidgets.QTabWidget):
 
 		self.show()
 
-
-if __name__ == '__main__':
+def run():
 	app = QtWidgets.QApplication(sys.argv)
 	devtools_widget = DevtoolsWidget()
 	sys.exit(app.exec_())
