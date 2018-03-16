@@ -1,6 +1,6 @@
 from PyQt5 import QtGui, QtWidgets, QtCore
 import json
-import os, appdirs
+import os, appdirs, shutil, pkg_resources
 
 class PresetsWidget(QtWidgets.QGroupBox):
 	"""Widget for applying presets to parent widget"""
@@ -14,7 +14,10 @@ class PresetsWidget(QtWidgets.QGroupBox):
 
 		settings['file_path'] = os.path.join(presets_dir, settings['file_name'])
 		if not os.path.exists(settings['file_path']):
-		    os.mknod(settings['file_path'])
+			if os.path.exists(pkg_resources.resource_filename('wdt', 'presets/' + settings['file_name'])):
+				shutil.copy(pkg_resources.resource_filename('wdt', 'presets/' + settings['file_name']), settings['file_path'])
+			else:
+			    os.mknod(settings['file_path'])
 
 		print(settings['name'] + ' path is ' + settings['file_path'])
 

@@ -2,6 +2,7 @@ import sys
 from wdt.ips import wialon_ips_page
 from wdt.remote_api import remote_api_page
 from PyQt5 import QtWidgets, QtGui
+import pkg_resources
 
 
 class DevtoolsWidget(QtWidgets.QTabWidget):
@@ -11,7 +12,7 @@ class DevtoolsWidget(QtWidgets.QTabWidget):
 
 	def initUI(self):
 		self.setWindowTitle('Wialon Devtools')
-		self.setWindowIcon(QtGui.QIcon('images/wialon.png'))
+		self.setWindowIcon(QtGui.QIcon(pkg_resources.resource_filename('wdt', 'images/wialon.png')))
 		self.setGeometry(300, 300, 800, 620)
 
 		self.addTab(remote_api_page.RemoteAPIPage(), 'Remote API')
