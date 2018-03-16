@@ -16,7 +16,7 @@ setup(
 	author='Sergey Shevchik',
 	author_email='sergey.shevchik@gmail.com',
 	packages=find_packages(),
-    install_requires=['PyQt5', 'PyCRC', 'appdirs', 'pkg_resources', 'shutil'],
+    install_requires=['pyqt5', 'pycrc', 'appdirs', 'setuptools'],
 	package_data={
         '': ['presets/*.preset', 'images/*.png']
     },
