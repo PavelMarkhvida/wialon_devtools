@@ -5,7 +5,7 @@
             "port": 443,
             "secure": true
         },
-        "name": "Wialon Devtools"
+        "name": "Wialon Hosting"
     },
     {
         "preset": {
@@ -16,23 +16,5 @@
             "secure": false
         },
         "name": "Wialon Local"
-    },
-    {
-        "preset": {
-            "password": "password",
-            "host": "hst-api.wialon.com",
-            "port": "443",
-            "user": "shse_test",
-            "secure": true
-        },
-        "name": "hosting"
-    },
-    {
-        "preset": {
-            "host": "hst-api.wialon.com",
-            "port": "443",
-            "secure": true
-        },
-        "name": "new_preset"
     }
 ]

@@ -6,12 +6,5 @@
             "target": "core"
         },
         "name": "Search UNITS"
-    },
-    {
-        "preset": {
-            "command": "deactivations_info",
-            "target": "hosting"
-        },
-        "name": "di"
     }
 ]
